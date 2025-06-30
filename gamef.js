@@ -323,7 +323,8 @@ const initialSeed = genSeed();
 const gameOptions = {
     worldWidth: DEFAULT_WORLDGEN_WIDTH,
     seed: initialSeed,
-    playerColor: 0
+    playerColor: 0,
+    worldgenMethod: 0
 };
 
 /** Try to set a game option, ensuring it is valid */
@@ -346,30 +347,41 @@ function trySetGameOption(optionKey, val) {
         val = Math.max(val, 0);
         val = Math.min(val, PLAYER_COLORS.length - 1);
     }
+    if (optionKey == 'worldgenMethod') {
+        val = Math.max(val, 0);
+        val = Math.min(val, 1);
+    }
     // Success
     gameOptions[optionKey] = val;
     return true;
 }
 
+function updateOptionKeyUI(optionKey) {
+    const thisVal = gameOptions[optionKey];
+    document.getElementById("in-" + optionKey).value = thisVal;
+    if (optionKey == 'playerColor') {
+        const colordisp = document.getElementById("colordisp");
+        colordisp.style.backgroundColor = PLAYER_COLORS[thisVal];
+    }
+    if (optionKey == 'worldgenMethod') {
+        const METHODS = ["Modern", "Legacy"]
+        const wm = document.getElementById("worldgenMethodText");
+        wm.innerText = METHODS[thisVal];
+    }
+}
+
 function activateGameOptionsInputs() {
-    const colordisp = document.getElementById("colordisp");
     for (const optionKey of Object.keys(gameOptions)) {
-        const thisInput = document.getElementById("in-" + optionKey);
         // Fill in the default value
-        thisInput.value = gameOptions[optionKey];
+        updateOptionKeyUI(optionKey)
+
         // Set up listening to events
+        const thisInput = document.getElementById("in-" + optionKey);
         const thisOptionKey = optionKey;
-        if (thisOptionKey == 'playerColor') {
-            colordisp.style.backgroundColor = PLAYER_COLORS[gameOptions[thisOptionKey]];
-        }
         thisInput.addEventListener("change", (e) => {
             trySetGameOption(thisOptionKey, e.target.value)
             // Set back to whatever the actual value is
-            thisInput.value = gameOptions[thisOptionKey];
-            // Special cases
-            if (thisOptionKey == 'playerColor') {
-                colordisp.style.backgroundColor = PLAYER_COLORS[gameOptions[thisOptionKey]];
-            }
+            updateOptionKeyUI(thisOptionKey)
         });
     }
 }

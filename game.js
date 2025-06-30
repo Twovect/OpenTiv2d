@@ -908,11 +908,21 @@ function gameSetup() {
         player.color = gameOptions.playerColor;
         // Generate world in multiplayer only
         if(!multiplayer) {
-            let vals = betterWorldGen(gameOptions);
-            map = processHeightMap(vals);
+            if (gameOptions.worldgenMethod == 0) {
+                // Normal
+                let vals = betterWorldGen(gameOptions);
+                map = processHeightMap(vals);
+            } else {
+                // Legacy
+                legacyWorldGeneration();
+            }
             const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
-            var xSpawnPoint = Math.round(seedPercent * ((vals.length-1) - 0) + 0);
-            var ySpawnPoint = vals[xSpawnPoint];
+            var xSpawnPoint = Math.round(seedPercent * ((map[0].length-1) - 0) + 0);
+            var ySpawnPoint = 0;
+            /*for (let y = 0; y < map.length; ++y) {
+                if (map[y][xSpawnPoint][0] == 0) {
+                vals[xSpawnPoint];
+            }*/
             for(var i=map.length-1;i>0;i--){
                 if(map[i][xSpawnPoint][0] != 0 && map[i-1][xSpawnPoint][0] == 0 && map[i-2][xSpawnPoint][0] == 0){
                     ySpawnPoint = map.length - i;
@@ -968,6 +978,7 @@ function processHeightMap(hMap){
     return nMap;
 }
 function legacyWorldGeneration(){
+    // TODO: allow legacy worldgen to work with seeds
     var wMap = [];
     var biomes = [1,0,1,0,1];
     var maxBiomes = 2;
