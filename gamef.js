@@ -317,11 +317,35 @@ document.getElementById("gameMode").onclick = function switchMode() {
         document.getElementById("gameMode").innerHTML = "Singleplayer";
     }
 }
-document.getElementById("start").onclick = function launchGame() {
-    //fix this it is partially working
-    document.getElementById("mainScreen").style.display = "none";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("amc05").style.display = "inline";
+
+// LAUNCHING AND OPTIONS
+const initialSeed = genSeed();
+const gameOptions = {
+    worldWidth: DEFAULT_WORLDGEN_WIDTH,
+    seed: initialSeed
+};
+
+function activateGameOptionsInputs() {
+    for (const optionKey of Object.keys(gameOptions)) {
+        const thisInput = document.getElementById("in-" + optionKey);
+        // Fill in the default value
+        thisInput.value = gameOptions[optionKey];
+        // Set up listening to events
+        const thisOptionKey = optionKey;
+        thisInput.addEventListener("change", (e) => {
+            gameOptions[thisOptionKey] = e.target.value;
+            // TODO: validate option
+        });
+    }
+}
+activateGameOptionsInputs();
+
+// Launch the game with the start button
+document.getElementById("start").addEventListener("click", async () => {
+    // Legacy comment: "fix this it is partially working"
+    document.getElementById("start").innerText = "Loading...";
+    document.getElementById("start").disabled = true;
+    await (new Promise(res => setTimeout(res, 1)));
     if(gameMode == "Multiplayer" && !loadServerData.usingData){
         loadServerData.usingData = true;
         ws.send(`joinrequest|${sid}`);
@@ -329,8 +353,13 @@ document.getElementById("start").onclick = function launchGame() {
     }
     loadScreen(1);
     loadGame();
+    document.getElementById("mainScreen").style.display = "none";
+    document.getElementById("bodysplit").style.display = "none";
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("amc05").style.display = "inline";
     setTimeout(dataLoaded,5000);
-}
+});
+
 function loadGame(){
     if((multiplayer && loadServerData.mapLoaded && loadServerData.spawnPointLoaded) || (loadData.usingData && loadData.dataLoaded) || (!loadData.usingData && gameMode == "Singleplayer") && !loaded){
         if(loadData.usingData && gameMode == "Singleplayer"){
@@ -349,6 +378,7 @@ function loadGame(){
         gameSetup();
     }
 }
+
 function vehColSides(veh){
     var values = [];
     for(var i=0;i<4;i++){

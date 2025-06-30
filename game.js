@@ -854,6 +854,7 @@ function isSolid(val) {
     return false;
 };
 function gameSetup() {
+    console.log("start setup")
     if(!loaded){
         loaded = true;
         for(var j = 0; j < BLOCK_SOURCES.length; j++) {
@@ -904,36 +905,36 @@ function gameSetup() {
         projectile.src = "texture/metalProjectile.png";
         electricEffect = document.createElement("IMG");
         electricEffect.src = "texture/electricEffect.png";
-        if(!multiplayer){
-            let vals = betterWorldGen(genSeed());
+        if(!multiplayer) {
+            let vals = betterWorldGen(gameOptions);
             map = processHeightMap(vals);
             var xSpawnPoint = Math.round(Math.random() * ((vals.length-1) - 0) + 0);
-        var ySpawnPoint = vals[xSpawnPoint];
-        console.log(xSpawnPoint+" "+ySpawnPoint);
-        for(var i=map.length-1;i>0;i--){
-            if(map[i][xSpawnPoint][0] != 0 && map[i-1][xSpawnPoint][0] == 0 && map[i-2][xSpawnPoint][0] == 0){
-                ySpawnPoint = map.length - i;
-                break;
+            var ySpawnPoint = vals[xSpawnPoint];
+            //console.log(xSpawnPoint+" "+ySpawnPoint);
+            for(var i=map.length-1;i>0;i--){
+                if(map[i][xSpawnPoint][0] != 0 && map[i-1][xSpawnPoint][0] == 0 && map[i-2][xSpawnPoint][0] == 0){
+                    ySpawnPoint = map.length - i;
+                    break;
+                }
             }
-        }
-        worldSpawnPoint.x = (xSpawnPoint*36)+1;
-        worldSpawnPoint.y = (ySpawnPoint*36)+1;
-        player.pl = worldSpawnPoint.x;
-        player.pr = worldSpawnPoint.x+34;
-        player.pb = worldSpawnPoint.y;
-        player.pt = worldSpawnPoint.y+69;
-        gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
-        gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
-        for(var i=0;i<entities.length;i++){
-            entities[i].pl = worldSpawnPoint.x;
-            entities[i].pr = worldSpawnPoint.x+34;
-            entities[i].pb = worldSpawnPoint.y;
-            entities[i].pt = worldSpawnPoint.y+69;
-        }
-        for(var i=0;i<vehicles.length;i++){
-            vehicles[i].x = worldSpawnPoint.x+220;
-            vehicles[i].y = worldSpawnPoint.y;
-        }
+            worldSpawnPoint.x = (xSpawnPoint*36)+1;
+            worldSpawnPoint.y = (ySpawnPoint*36)+1;
+            player.pl = worldSpawnPoint.x;
+            player.pr = worldSpawnPoint.x+34;
+            player.pb = worldSpawnPoint.y;
+            player.pt = worldSpawnPoint.y+69;
+            gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
+            gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
+            for(var i=0;i<entities.length;i++){
+                entities[i].pl = worldSpawnPoint.x;
+                entities[i].pr = worldSpawnPoint.x+34;
+                entities[i].pb = worldSpawnPoint.y;
+                entities[i].pt = worldSpawnPoint.y+69;
+            }
+            for(var i=0;i<vehicles.length;i++){
+                vehicles[i].x = worldSpawnPoint.x+220;
+                vehicles[i].y = worldSpawnPoint.y;
+            }
         }
         gameCharacterActive = true;
         renderFrame();
@@ -963,75 +964,6 @@ function processHeightMap(hMap){
         }
     }
     return nMap;
-}
-function betterPow(a, b) {
-    return Math.pow(Math.abs(a), b) * (
-        (a < 0) ? -1 : 1
-    );
-}
-function genSeed(){
-    var seed = Math.floor((Math.random()*999999999)+100000000);
-    console.log(seed);
-    return seed;
-}
-function betterWorldGen(seed){
-    var vals = [];
-    for(var i=0;i<DEFAULT_WORLDGEN_WIDTH;i++){
-        vals.push(Math.floor(worldGenMountain(i,seed)));
-    }
-    return vals;
-}
-function worldGenMountain(xh,seed) {
-    let x = xh/10
-    let res = 0;
-    res += 3.5;
-    let term2tosum = 0;
-    for(let n = 1; n <= 20; n++) {
-        let thisval = (
-            1.0/4.0 * Math.sin(
-                betterPow(Math.E, n/10.0) * (
-                    x/5.0 + 60.0 + seed + betterPow(n, Math.cos(x)/20.0)
-                )
-            ) + 1.0/5.0 * Math.sin(
-                betterPow(Math.E, (n+3.0)/10.0) * (
-                    x/10.0 + 60.0 + seed
-                )
-            )
-        );
-        term2tosum += thisval;
-    }
-    let term2 = (
-        4.0 * Math.atan(
-            3.0/4.0 * (
-                betterPow(term2tosum, 15.0/13.0)
-            )
-        )
-    );
-    res += term2;
-    let term3tosum = 0;
-    for(let n = 1; n <= 20; n++) {
-        let thisval = (
-            1.0/4.0 * Math.sin(
-                betterPow(Math.E, n/10.0) * (
-                    x/5.0 + 60.0 + 3 * seed + betterPow(n, Math.cos(x)/20.0)
-                )
-            ) + 1.0/5.0 * Math.sin(
-                betterPow(Math.E, (n+3.0)/10.0) * (
-                    x/2.0 + 60.0 + 2.0 * seed
-                )
-            )
-        );
-        term3tosum += thisval;
-    }
-    let term3 = (
-        4.0/5.0 * Math.atan(
-            3.0/4.0 * (
-                betterPow(term3tosum, 15.0/13.0)
-            )
-        )
-    )
-    res += term3;
-    return res*DEFAULT_WORLDGEN_VERTICAL_SCALE;
 }
 function legacyWorldGeneration(){
     var wMap = [];

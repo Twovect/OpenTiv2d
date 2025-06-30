@@ -20,21 +20,21 @@
         <link rel="icon" type="image/png" href="icon.png">
     </head>
     <body class="noScrollBar">
-        <div class="bodysplit">
+        <div id="bodysplit">
             <div id="menu">
                 <h1 id="menuTtl">tivect</h1>
                 <a href="https://tivect.com/howto.html"><button class="menuButton">How To Play</button></a>
                 <a href="https://tivect.com/changelog.html"><button class="menuButton">Change Log</button></a>
                 <button class="menuButton" onclick=getFile()>Import Data</button>
                 <h1 id="htd">Download a save file by pressing (L) and (O) at the same time</h1>
-                <h1 id="note"></h1>
+                <!-- <h1 id="note"></h1> -->
                 <a hidden="hidden" id="downloadSave" download="world.tivect"></a>
                 <!-- <input hidden="hidden" id="saveFile" type="file" onchange=readSave()> -->
-                <div>
-                    <button id="copyright">
+                <div class="endElement">
+                    <span id="copyright">
                         &copy; 2021-2023 <a id="site"href="https://tivect.com/">tivect</a>.
                         <br>Extended by the OpenTiv2d Project
-                    </button>
+                    </span>
                 </div>
             </div>
             <div id="mainScreen">
@@ -51,7 +51,14 @@
                         </div>
                         <div id="settings">
                             <div id="innersettings">
-                                Settings
+                                <div class="settingbox">
+                                    <span>World Width</span>
+                                    <input id="in-worldWidth" type="text" placeholder="10000">
+                                </div>
+                                <div class="settingbox">
+                                    <span>Seed</span>
+                                    <input id="in-seed" type="text" placeholder="12345">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -62,6 +69,7 @@
         <div id="amc05">
             <canvas id="canvas"></canvas>
             <script src="game_constants.js"></script>
+            <script src="game_worldgen.js"></script>
             <script id="gameScript" src="game.js"></script>
             <script src="gamef.js"></script>
         </div>
