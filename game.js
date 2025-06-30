@@ -142,12 +142,14 @@ var menuActive = [false, menuData.block];
     energyUsed: null,
     power: ENERGY_DATA_POWER,
 }*/
-function block(y,x,num) {
-    if(num > DBLOCKS.length-1 || num < 0){
+
+function setWorldBlockToId(y,x,blockId) {
+    if (blockId > DBLOCKS.length-1 || blockId < 0){
         return;
     }
-    map[y][x] = DBLOCKS[num];
+    map[y][x] = DBLOCKS[blockId];
 }
+
 var player = {
     pl: 0,
     pr: 34,
@@ -934,7 +936,7 @@ function gameSetup() {
         }
         }
         gameCharacterActive = true;
-        gameCharacter();
+        renderFrame();
         // setInterval(useControls,1000/60);
         respawn();
     }
@@ -2927,7 +2929,7 @@ function useControls(){
                             if(map[blockY][blockX][1] == false || map[blockY][blockX][1] - dmgVal <= 0){
                                 if(!blockMultiCheck(blockY,blockX) || !isSolid(place)){
                                     var prevBlock = map[blockY][blockX];
-                                    block(blockY,blockX,place);
+                                    setWorldBlockToId(blockY,blockX,place);
                                     if(multiplayer){
                                         ws.send(`build|${blockY}|${blockX}|${place}|${sid}`);
                                     }
@@ -3043,7 +3045,8 @@ function useControls(){
         multiplayerLoop();
     }
 }
-function gameCharacter() {
+
+function renderFrame() {
     useControls();
     // gameOffsetX = (player.pr-17 - disp.width/2)*0.06 + gameOffsetX*0.94;
     // gameOffsetY = (player.pt - disp.height/2)*0.015 + gameOffsetY*0.985;
@@ -3254,7 +3257,7 @@ function gameCharacter() {
         };
     };
     if(time == "night"){
-        ctx.fillStyle = "#00000060";
+        ctx.fillStyle = COLOR_NIGHT_CANVAS_TINT;
         ctx.fillRect(0, 0, disp.width, disp.height);
     }
     var halfHp = null;
@@ -3314,9 +3317,10 @@ function gameCharacter() {
         drawMobileControls();
     }
     if (gameCharacterActive) {
-        setTimeout(window.requestAnimationFrame(gameCharacter),1000/60);
-        // window.requestAnimationFrame(gameCharacter);
+        setTimeout(window.requestAnimationFrame(renderFrame),1000/60);
+        // window.requestAnimationFrame(renderFrame);
     } else if (!gameCharacterActive) {
+        console.log("GAME CHARACTER NOT ACTIVE")
         ctx.clearRect(0, 0, disp.width, disp.height);
     };
 };
