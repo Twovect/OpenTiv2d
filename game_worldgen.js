@@ -4,16 +4,9 @@ function betterPow(a, b) {
     );
 }
 
-function genSeed() {
-    let seed = Math.floor((Math.random()*999999999)+100000000);
-    //console.log(seed);
-    return seed;
-}
-
 function betterWorldGen(options) {
     const vals = [];
     const seed = parseInt(options.seed);
-    console.log('worldgen with ' + seed);
     const worldWidth = parseInt(options.worldWidth);
     for(let i = 0; i < worldWidth; i++){
         vals.push(Math.floor(worldGenMountain(i, seed)));

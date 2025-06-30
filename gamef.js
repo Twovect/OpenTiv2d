@@ -276,24 +276,17 @@ ws.onmessage = function (e) {
         sid = res.sid;
     }
 }
-function notVehicle(){
 
-}
-function loadScreen(state){
-    if(state == 1){
-        document.getElementById("amc05").style.display = "none";
-        document.getElementById("loadingScreen").style.display = "inline";
-    } else if(state == 0){
-        document.getElementById("amc05").style.display = "inline";
-        document.getElementById("loadingScreen").style.display = "none";
-    }
-}
+// Legacy relic of the codebase
+/*function notVehicle(){
+}*/
+
 function dataLoaded(){
     if(!loadData.dataLoaded && (loadData.usingData || gameMode == "Multiplayer")){
         document.getElementById("loadingScreen").style.display = "none";
         document.getElementById("mainScreen").style.display = "inline";
         document.getElementById("menu").style.display = "inline";
-        document.getElementById("amc05").style.display = "none";
+        //document.getElementById("amc05").style.display = "none";
         clearInterval(load);
         load = null;
         multi = false;
@@ -301,111 +294,6 @@ function dataLoaded(){
         loadServerData.usingData = false;
     }
 }
-function getFile() {
-    document.getElementById("saveFile").click();
-}
-function toGame() {
-    document.getElementById("amc05").style.display = "none";
-    document.getElementById("amc03").style.display = "inline";
-}
-document.getElementById("gameMode").onclick = function switchMode() {
-    if(gameMode == "Singleplayer"){
-        gameMode = "Multiplayer";
-        document.getElementById("gameMode").innerHTML = "Multiplayer";
-    } else if(gameMode == "Multiplayer"){
-        gameMode = "Singleplayer";
-        document.getElementById("gameMode").innerHTML = "Singleplayer";
-    }
-}
-
-// LAUNCHING AND OPTIONS
-const initialSeed = genSeed();
-const gameOptions = {
-    worldWidth: DEFAULT_WORLDGEN_WIDTH,
-    seed: initialSeed,
-    playerColor: 0,
-    worldgenMethod: 0
-};
-
-/** Try to set a game option, ensuring it is valid */
-function trySetGameOption(optionKey, val) {
-    // Ensure integer
-    const parsed = parseInt(val);
-    if (isNaN(parsed) || parsed == null) {
-        return false;
-    }
-    val = parsed;
-    // Specifics
-    if (optionKey == 'worldWidth') {
-        val = Math.max(val, MIN_ALLOWED_WORLDGEN_WIDTH);
-        val = Math.min(val, MAX_ALLOWED_WORLDGEN_WIDTH);
-    }
-    if (optionKey == 'seed') {
-        val = Math.max(val, 0);
-    }
-    if (optionKey == 'playerColor') {
-        val = Math.max(val, 0);
-        val = Math.min(val, PLAYER_COLORS.length - 1);
-    }
-    if (optionKey == 'worldgenMethod') {
-        val = Math.max(val, 0);
-        val = Math.min(val, 1);
-    }
-    // Success
-    gameOptions[optionKey] = val;
-    return true;
-}
-
-function updateOptionKeyUI(optionKey) {
-    const thisVal = gameOptions[optionKey];
-    document.getElementById("in-" + optionKey).value = thisVal;
-    if (optionKey == 'playerColor') {
-        const colordisp = document.getElementById("colordisp");
-        colordisp.style.backgroundColor = PLAYER_COLORS[thisVal];
-    }
-    if (optionKey == 'worldgenMethod') {
-        const METHODS = ["Modern", "Legacy"]
-        const wm = document.getElementById("worldgenMethodText");
-        wm.innerText = METHODS[thisVal];
-    }
-}
-
-function activateGameOptionsInputs() {
-    for (const optionKey of Object.keys(gameOptions)) {
-        // Fill in the default value
-        updateOptionKeyUI(optionKey)
-
-        // Set up listening to events
-        const thisInput = document.getElementById("in-" + optionKey);
-        const thisOptionKey = optionKey;
-        thisInput.addEventListener("change", (e) => {
-            trySetGameOption(thisOptionKey, e.target.value)
-            // Set back to whatever the actual value is
-            updateOptionKeyUI(thisOptionKey)
-        });
-    }
-}
-activateGameOptionsInputs();
-
-// Launch the game with the start button
-document.getElementById("start").addEventListener("click", async () => {
-    // Legacy comment: "fix this it is partially working"
-    document.getElementById("start").innerText = "Loading...";
-    document.getElementById("start").disabled = true;
-    await (new Promise(res => setTimeout(res, 1)));
-    if(gameMode == "Multiplayer" && !loadServerData.usingData){
-        loadServerData.usingData = true;
-        ws.send(`joinrequest|${sid}`);
-        load = setInterval(loadGame,100);
-    }
-    loadScreen(1);
-    loadGame();
-    document.getElementById("mainScreen").style.display = "none";
-    document.getElementById("bodysplit").style.display = "none";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("amc05").style.display = "inline";
-    setTimeout(dataLoaded,5000);
-});
 
 function loadGame(){
     if((multiplayer && loadServerData.mapLoaded && loadServerData.spawnPointLoaded) || (loadData.usingData && loadData.dataLoaded) || (!loadData.usingData && gameMode == "Singleplayer") && !loaded){
@@ -421,7 +309,6 @@ function loadGame(){
         }
         clearInterval(load);
         load = null;
-        loadScreen(0);
         gameSetup();
     }
 }
