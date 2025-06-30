@@ -2,7 +2,8 @@
 <html>
     
 <!-- Mirrored from game.tivect.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 29 Jun 2025 22:49:53 GMT -->
-<!-- Later extended -->
+<!-- Originally developed by AMC45 from 2021-2023 -->
+<!-- Later extended by the OpenTiv2d Project starting 2025/06/29 -->
 <head class="noScrollBar">
         <title>tivect</title>
         <meta name="description" content="2D Free Explore Game. Singeplayer & Multiplayer. PvP, PvE, Build.">
@@ -19,26 +20,40 @@
         <link rel="icon" type="image/png" href="icon.png">
     </head>
     <body class="noScrollBar">
-        <div id="menu">
-            <h1 id="menuTtl">tivect</h1>
-            <a href="https://tivect.com/howto.html"><button class="menuButton">How To Play</button></a>
-            <a href="https://tivect.com/changelog.html"><button class="menuButton">Change Log</button></a>
-            <button class="menuButton" onclick=getFile()>Import Data</button>
-            <h1 id="htd">Download a save file by pressing (L) and (O) at the same time</h1>
-            <h1 id="note"></h1>
-            <a hidden="hidden" id="downloadSave" download="world.tivect"></a>
-            <input hidden="hidden" id="saveFile" type="file" onchange=readSave()>
-        </div>
-        <div id="mainScreen">
-            <div id="launcher">
-                <div id="offline">
-                    <div id="logoImg"></div>
+        <div class="bodysplit">
+            <div id="menu">
+                <h1 id="menuTtl">tivect</h1>
+                <a href="https://tivect.com/howto.html"><button class="menuButton">How To Play</button></a>
+                <a href="https://tivect.com/changelog.html"><button class="menuButton">Change Log</button></a>
+                <button class="menuButton" onclick=getFile()>Import Data</button>
+                <h1 id="htd">Download a save file by pressing (L) and (O) at the same time</h1>
+                <h1 id="note"></h1>
+                <a hidden="hidden" id="downloadSave" download="world.tivect"></a>
+                <!-- <input hidden="hidden" id="saveFile" type="file" onchange=readSave()> -->
+                <div>
+                    <button id="copyright">
+                        &copy; 2021-2023 <a id="site"href="https://tivect.com/">tivect</a>.
+                        <br>Extended by the OpenTiv2d Project
+                    </button>
                 </div>
-                <div id="startBar">
-                    <div id="startButtons">
-                        <button id="gameMode">Singleplayer</button>
-                        <button id="start">Play</button>
-                        <button id="copyright">&copy; 2021-2023 <a id="site"href="https://tivect.com/">tivect</a>.</button>
+            </div>
+            <div id="mainScreen">
+                <div id="launcher">
+                    <div id="offline">
+                        <div id="logoImg"></div>
+                    </div>
+                    <div id="bottomMenu">
+                        <div id="startBar">
+                            <div id="startButtons">
+                                <button id="gameMode">Singleplayer</button>
+                                <button id="start">Play</button>
+                            </div>
+                        </div>
+                        <div id="settings">
+                            <div id="innersettings">
+                                Settings
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

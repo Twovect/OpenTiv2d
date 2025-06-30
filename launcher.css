@@ -1,6 +1,8 @@
 body,html{margin:0; height:100%; width:100%; overflow: hidden;}
 body{
     background-color:#313535;
+    font-family: sans-serif;
+    color: #f0f0f0;
 }
 .noScrollBar::-webkit-scrollbar{
     width: 0%;
@@ -17,32 +19,57 @@ body{
     cursor:pointer;
     color:#088181;
 }
+.bodysplit {
+    display: flex;
+    flex-direction: row;
+}
 #launcher{
     position:relative;
     width: auto;
     height:100%;
+    display: flex;
+    flex-direction: column;
+}
+#bottomMenu{
+    width:100%;
+    flex-grow: 1;
+    background-color:#1d1f1f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 #startBar{
-    position:absolute;
-    width:100%;
-    height:80px;
-    background-color:#1d1f1f;
-    top:80%;
+    width: 100%;
+    background-color: #131414;
+    height: 80px;
+    display: flex;
     align-items: center;
+    justify-content: center;
+}
+#settings{
+    width: 100%;
+    flex-grow: 1;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: flex-start;
+    text-align: left;
+    /*padding: 10px;
+    padding-left: 20px;*/
+}
+#innersettings{
+    padding: 20px;
 }
 #start{
-    position: absolute;
     height:70px;
     width:275px;
     background-color:#1d1f1f;
     border:6px solid #088181;
-    transform:translateX(-50%);
-    left:50%;
-    top:5px;
     color:#f0f0f0;
     font-size:30px;
     font-weight: 200px;
-    font-family: sans-serif;
     outline: none;
 }
 #start:hover{
@@ -55,15 +82,14 @@ body{
     border-color:#d3d3d3;
 }
 #gameMode{
-    position: absolute;
-    transform:translateX(-50%);
+    /*position: absolute;
+    transform:translateX(-50%);*/
     width:120px;
     height:40px;
     top:20px;
     background-color: #1d1f1f;
     color:#f0f0f0;
     border:solid 4px #313535;
-    font-family: sans-serif;
     font-size: 14px;
     font-weight: 200px;
     outline: none;
@@ -77,15 +103,14 @@ body{
     border-color: #1d1f1f;
 }
 #startButtons{
-    position:absolute;
-    transform:translateX(-50%);
-    left:50%;
-    width:430px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    align-items: center;
+    margin-left: 10%;
 }
 #offline{
-    position:absolute;
-    transform:translateX(-50%);
-    left:50%;
     width:100%;
     height:70%;
 }
@@ -97,10 +122,6 @@ body{
     height:70%;
 }
 #logoImg{
-    position:absolute;
-    transform:translateX(-50%);
-    left:50%;
-    width:100%;
     background-image: url("icon.png");
     background-size: contain;
     background-repeat:no-repeat;
@@ -108,17 +129,13 @@ body{
     height:100%;
 }
 #copyright{
-    position: absolute;
-    width: 165px;
-    transform:translateX(-50%);
-    left:100%;
-    text-align: center;
+    text-align: left;
     background-color: transparent;
     border:none;
     color:#f0f0f0;
     top:62px;
     font-size:9px;
-    font-family: sans-serif;
+    height: 100%;
 }
 #mainScreen{
     position:absolute;
@@ -135,7 +152,6 @@ body{
     background-color: #1d1f1f;
     border-right: solid 3px #161818;
     z-index: 5;
-    font-family: sans-serif;
 }
 .menuButton{
     position:relative;
