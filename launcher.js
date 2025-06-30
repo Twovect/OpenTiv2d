@@ -43,7 +43,8 @@ const gameOptions = {
     worldWidth: DEFAULT_WORLDGEN_WIDTH,
     seed: initialSeed,
     playerColor: 0,
-    worldgenMethod: 0
+    worldgenMethod: 0,
+    godMode: 0
 };
 const GAME_OPTION_LIMITS = {
     worldWidth: {
@@ -58,6 +59,10 @@ const GAME_OPTION_LIMITS = {
         max: PLAYER_COLORS.length - 1
     },
     worldgenMethod: {
+        min: 0,
+        max: 2
+    },
+    godMode: {
         min: 0,
         max: 1
     }
@@ -91,7 +96,7 @@ function updateOptionKeyUI(optionKey) {
         colordisp.style.backgroundColor = PLAYER_COLORS[thisVal];
     }
     if (optionKey == 'worldgenMethod') {
-        const METHODS = ["Modern", "Legacy"]
+        const METHODS = ["Modern", "Diverse", "Legacy"]
         const wm = document.getElementById("worldgenMethodText");
         wm.innerText = METHODS[thisVal];
     }

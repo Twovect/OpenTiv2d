@@ -277,16 +277,11 @@ ws.onmessage = function (e) {
     }
 }
 
-// Legacy relic of the codebase
-/*function notVehicle(){
-}*/
-
 function dataLoaded(){
     if(!loadData.dataLoaded && (loadData.usingData || gameMode == "Multiplayer")){
         document.getElementById("loadingScreen").style.display = "none";
         document.getElementById("mainScreen").style.display = "inline";
         document.getElementById("menu").style.display = "inline";
-        //document.getElementById("amc05").style.display = "none";
         clearInterval(load);
         load = null;
         multi = false;

@@ -144,9 +144,11 @@ var menuActive = [false, menuData.block];
 }*/
 
 function setWorldBlockToId(y,x,blockId) {
+    console.log("Placing at (y: " + y + ", x: " + x + ")")
     if (blockId > DBLOCKS.length-1 || blockId < 0){
         return;
     }
+    // TODO: copy instead, to prevent reference issues??
     map[y][x] = DBLOCKS[blockId];
 }
 
@@ -909,9 +911,13 @@ function gameSetup() {
         // Generate world in multiplayer only
         if(!multiplayer) {
             if (gameOptions.worldgenMethod == 0) {
-                // Normal
-                let vals = betterWorldGen(gameOptions);
-                map = processHeightMap(vals);
+                // Modern
+                let heights = modernWorldgen(gameOptions);
+                map = processHeightMap(heights);
+            } else if (gameOptions.worldgenMethod == 1) {
+                // Diverse
+                let heights = diverseWorldgen(gameOptions);
+                map = processHeightMap(heights);
             } else {
                 // Legacy
                 legacyWorldGeneration();
@@ -957,23 +963,30 @@ function gameSetup() {
 function processHeightMap(hMap){
     var nMap = [];
     var width = hMap.length;
-    var height = 200;
+    var height = DEFAULT_WORLDGEN_HEIGHT;
     for(var i=0;i<height;i++){
         nMap.push([])
     }
     for(var i=0;i<width;i++){
         var aVal = height-(hMap[i]+height/2)
         for(var j=0;j<height;j++){
-            if(j<aVal){
+            if (j<aVal && j < DEFAULT_WATER_LEVEL) {
                 nMap[j].push(DBLOCKS[0]);
-            } else if (j == aVal){
+            }
+            else if (j<aVal && j >= DEFAULT_WATER_LEVEL) {
+                nMap[j].push(DBLOCKS[13]); // Water
+            }
+            else if (j == aVal) {
                 nMap[j].push(DBLOCKS[1]);
-            } else if(j > aVal && j < aVal+5){
+            }
+            else if (j > aVal && j < aVal+5) {
                 nMap[j].push(DBLOCKS[4]);
-            } else if(j >= aVal+5){
+            }
+            else if (j >= aVal+5) {
                 nMap[j].push(DBLOCKS[5]);
             }
         }
+        // Fill in bodies of water also
     }
     return nMap;
 }
