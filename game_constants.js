@@ -203,6 +203,10 @@ const DBLOCKS = [
     [55,6,"metal"]
 ];
 
+// GAME CONSTANTS
+const DEFAULT_WORLDGEN_WIDTH = 10000; // Originally 100000, reduce for efficiency
+const DEFAULT_WORLDGEN_VERTICAL_SCALE = 5; // Originally 10
+
 // IMAGE SOURCE URLS
 const BLOCK_SOURCES = [
     "",

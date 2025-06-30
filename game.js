@@ -976,7 +976,7 @@ function genSeed(){
 }
 function betterWorldGen(seed){
     var vals = [];
-    for(var i=0;i<100000;i++){
+    for(var i=0;i<DEFAULT_WORLDGEN_WIDTH;i++){
         vals.push(Math.floor(worldGenMountain(i,seed)));
     }
     return vals;
@@ -1031,9 +1031,9 @@ function worldGenMountain(xh,seed) {
         )
     )
     res += term3;
-    return res*10;
+    return res*DEFAULT_WORLDGEN_VERTICAL_SCALE;
 }
-function worldGeneration(){
+function legacyWorldGeneration(){
     var wMap = [];
     var biomes = [1,0,1,0,1];
     var maxBiomes = 2;
