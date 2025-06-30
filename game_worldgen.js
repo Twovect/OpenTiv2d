@@ -12,8 +12,11 @@ function genSeed() {
 
 function betterWorldGen(options) {
     const vals = [];
-    for(let i = 0; i < options.worldWidth; i++){
-        vals.push(Math.floor(worldGenMountain(i, options.seed)));
+    const seed = parseInt(options.seed);
+    console.log('worldgen with ' + seed);
+    const worldWidth = parseInt(options.worldWidth);
+    for(let i = 0; i < worldWidth; i++){
+        vals.push(Math.floor(worldGenMountain(i, seed)));
     }
     return vals;
 }

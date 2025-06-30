@@ -204,6 +204,8 @@ const DBLOCKS = [
 ];
 
 // GAME CONSTANTS
+const MIN_ALLOWED_WORLDGEN_WIDTH = 10;
+const MAX_ALLOWED_WORLDGEN_WIDTH = 900000;
 const DEFAULT_WORLDGEN_WIDTH = 10000; // Originally 100000, reduce for efficiency
 const DEFAULT_WORLDGEN_VERTICAL_SCALE = 5; // Originally 10
 

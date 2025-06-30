@@ -325,6 +325,30 @@ const gameOptions = {
     seed: initialSeed
 };
 
+/** Try to set a game option, ensuring it is valid */
+function trySetGameOption(optionKey, val) {
+    if (optionKey == 'worldWidth') {
+        const parsed = parseInt(val);
+        if (isNaN(parsed) || parsed == null) {
+            return false;
+        }
+        val = parsed;
+        val = Math.max(val, MIN_ALLOWED_WORLDGEN_WIDTH);
+        val = Math.min(val, MAX_ALLOWED_WORLDGEN_WIDTH);
+    }
+    if (optionKey == 'seed') {
+        const parsed = parseInt(val);
+        if (isNaN(parsed) || parsed == null) {
+            return false;
+        }
+        val = parsed;
+        val = Math.max(val, 0);
+    }
+    // Success
+    gameOptions[optionKey] = val;
+    return true;
+}
+
 function activateGameOptionsInputs() {
     for (const optionKey of Object.keys(gameOptions)) {
         const thisInput = document.getElementById("in-" + optionKey);
@@ -333,8 +357,9 @@ function activateGameOptionsInputs() {
         // Set up listening to events
         const thisOptionKey = optionKey;
         thisInput.addEventListener("change", (e) => {
-            gameOptions[thisOptionKey] = e.target.value;
-            // TODO: validate option
+            trySetGameOption(thisOptionKey, e.target.value)
+            // Set back to whatever the actual value is
+            thisInput.value = gameOptions[thisOptionKey];
         });
     }
 }

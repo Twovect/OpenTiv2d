@@ -908,7 +908,8 @@ function gameSetup() {
         if(!multiplayer) {
             let vals = betterWorldGen(gameOptions);
             map = processHeightMap(vals);
-            var xSpawnPoint = Math.round(Math.random() * ((vals.length-1) - 0) + 0);
+            const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
+            var xSpawnPoint = Math.round(seedPercent * ((vals.length-1) - 0) + 0);
             var ySpawnPoint = vals[xSpawnPoint];
             //console.log(xSpawnPoint+" "+ySpawnPoint);
             for(var i=map.length-1;i>0;i--){
