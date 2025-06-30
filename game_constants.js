@@ -271,6 +271,7 @@ const CHAR_SOURCES = ["","zero.png","one.png","two.png","three.png","four.png","
 const ITEM_SOURCES = ["","energyCrystal.png","buttonOn.png","buttonOff.png","driveOn.png","driveOff.png","liquidEnergy.png","glassContainor.png","diamond.png","scoreCreate.png","largeMetalAxe.png","metalHammer.png","metalPickaxe.png","metalShovel.png","smallMetalAxe.png"];
 const ENTITY_SOURCES = ["entity.png","trader.png","hostile.png"];
 const PLAYER_SOURCES = ["player.png","colorPlayer.png","yellowPlayer.png","pinkPlayer.png","purplePlayer.png","LiBluePlayer.png","greenPlayer.png","orangePlayer.png"];
+const PLAYER_COLORS = ["red","green","yellow","pink","purple","cyan","green","orange"];
 const SWORD_SOURCES = ["", "firesword.png","metalsword.png"];
 const HIT_POINT_SOURCES = ["hitPoint.png","halfPoint.png","noPoint.png"];
 const BAR_FRAME_SOURCES = ["blockFrame.png","selectFrame.png"];

@@ -854,7 +854,6 @@ function isSolid(val) {
     return false;
 };
 function gameSetup() {
-    console.log("start setup")
     if(!loaded){
         loaded = true;
         for(var j = 0; j < BLOCK_SOURCES.length; j++) {
@@ -905,13 +904,15 @@ function gameSetup() {
         projectile.src = "texture/metalProjectile.png";
         electricEffect = document.createElement("IMG");
         electricEffect.src = "texture/electricEffect.png";
+        // Sync the player with the game options
+        player.color = gameOptions.playerColor;
+        // Generate world in multiplayer only
         if(!multiplayer) {
             let vals = betterWorldGen(gameOptions);
             map = processHeightMap(vals);
             const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
             var xSpawnPoint = Math.round(seedPercent * ((vals.length-1) - 0) + 0);
             var ySpawnPoint = vals[xSpawnPoint];
-            //console.log(xSpawnPoint+" "+ySpawnPoint);
             for(var i=map.length-1;i>0;i--){
                 if(map[i][xSpawnPoint][0] != 0 && map[i-1][xSpawnPoint][0] == 0 && map[i-2][xSpawnPoint][0] == 0){
                     ySpawnPoint = map.length - i;

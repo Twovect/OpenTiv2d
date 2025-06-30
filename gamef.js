@@ -322,27 +322,29 @@ document.getElementById("gameMode").onclick = function switchMode() {
 const initialSeed = genSeed();
 const gameOptions = {
     worldWidth: DEFAULT_WORLDGEN_WIDTH,
-    seed: initialSeed
+    seed: initialSeed,
+    playerColor: 0
 };
 
 /** Try to set a game option, ensuring it is valid */
 function trySetGameOption(optionKey, val) {
+    // Ensure integer
+    const parsed = parseInt(val);
+    if (isNaN(parsed) || parsed == null) {
+        return false;
+    }
+    val = parsed;
+    // Specifics
     if (optionKey == 'worldWidth') {
-        const parsed = parseInt(val);
-        if (isNaN(parsed) || parsed == null) {
-            return false;
-        }
-        val = parsed;
         val = Math.max(val, MIN_ALLOWED_WORLDGEN_WIDTH);
         val = Math.min(val, MAX_ALLOWED_WORLDGEN_WIDTH);
     }
     if (optionKey == 'seed') {
-        const parsed = parseInt(val);
-        if (isNaN(parsed) || parsed == null) {
-            return false;
-        }
-        val = parsed;
         val = Math.max(val, 0);
+    }
+    if (optionKey == 'playerColor') {
+        val = Math.max(val, 0);
+        val = Math.min(val, PLAYER_COLORS.length - 1);
     }
     // Success
     gameOptions[optionKey] = val;
@@ -350,16 +352,24 @@ function trySetGameOption(optionKey, val) {
 }
 
 function activateGameOptionsInputs() {
+    const colordisp = document.getElementById("colordisp");
     for (const optionKey of Object.keys(gameOptions)) {
         const thisInput = document.getElementById("in-" + optionKey);
         // Fill in the default value
         thisInput.value = gameOptions[optionKey];
         // Set up listening to events
         const thisOptionKey = optionKey;
+        if (thisOptionKey == 'playerColor') {
+            colordisp.style.backgroundColor = PLAYER_COLORS[gameOptions[thisOptionKey]];
+        }
         thisInput.addEventListener("change", (e) => {
             trySetGameOption(thisOptionKey, e.target.value)
             // Set back to whatever the actual value is
             thisInput.value = gameOptions[thisOptionKey];
+            // Special cases
+            if (thisOptionKey == 'playerColor') {
+                colordisp.style.backgroundColor = PLAYER_COLORS[gameOptions[thisOptionKey]];
+            }
         });
     }
 }
