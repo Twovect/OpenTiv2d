@@ -2,17 +2,13 @@ const disp = document.getElementById("canvas");
 const ctx = disp.getContext("2d");
 disp.height = window.innerHeight;
 disp.width = window.innerWidth;
-var version = "0.5.0";
+var version = "0.5.1_Fork";
 var loaded = false;
 var renderSize = 1;
 var current = 0;
 var fps = 30;
 var prev = 0;
-var map = [
-    [[1,3],[1,3],[1,3]],
-    [[4,3],[4,3],[4,3]],
-    [[4,3],[4,3],[4,3]]
-];
+var map = INITIAL_MAP;
 var rays = [];
 var mapCoord = {x:0,y:0}
 var worldSpawnPoint = {x:37,y:109}
@@ -31,65 +27,7 @@ var canHoldClick = true;
 var mobileControls = false;
 var multiplayer = false;
 var playersPos = [];
-var entities = [
-    // {
-    //     movingRight: false,
-    //     movingLeft: false,
-    //     stop: true,
-    //     time: 0,
-    //     pl: 0,
-    //     pr: 0,
-    //     pt: 0,
-    //     pb: 0,
-    //     pastXpos: 0,
-    //     jumping: true,
-    //     inWater: false,
-    //     inLeaves: false,
-    //     velX: 0,
-    //     velY: 0,
-    //     health: 30,
-    //     type: 1,
-    //     tracking: false,
-    // },
-    // {
-    //     movingRight: false,
-    //     movingLeft: false,
-    //     stop: true,
-    //     time: 0,
-    //     pl: 0,
-    //     pr: 0,
-    //     pt: 0,
-    //     pb: 0,
-    //     pastXpos: 0,
-    //     jumping: true,
-    //     inWater: false,
-    //     inLeaves: false,
-    //     velX: 0,
-    //     velY: 0,
-    //     inVehicle:-1,
-    //     health: 30,
-    //     type: 2,
-    //     traderMenu:{
-    //         type:"tradeMenu",
-    //         purpose:"trade",
-    //         bSlots:5,
-    //         mouseX:0,
-    //         mouseY:0,
-    //         row:0,
-    //         tabs:0,
-    //         highlighted:0,
-    //         trades:[
-    //             [[32,2,[]],[21,2,[]],[0,0,[]]],
-    //             // [15,22,0],
-    //             // [26,23,0],
-    //             // [27,24,0],
-    //             // [17,25,0],
-    //             // [18,26,0],
-    //         ]
-    //     },
-    //     tracking: false,
-    // },
-];
+var entities = DEFAULT_ENTITIES;
 var vehicles = [];
 var particels = [];
 var projectiles = [];
@@ -103,15 +41,7 @@ var blockSelect = 0;
 var swordSelect = 0;
 var energySelect = 0;
 var clickAction = null;
-var entitySrc = ["entity.png","trader.png","hostile.png"];
-var energySources = [""];
-var charSources = ["","zero.png","one.png","two.png","three.png","four.png","five.png","six.png","seven.png","eight.png","nine.png","A.png","B.png","C.png","D.png","E.png","F.png","G.png","H.png","I.png","J.png","K.png","L.png","M.png","N.png","O.png","P.png","Q.png","R.png","S.png","T.png","U.png","V.png","W.png","X.png","Y.png","Z.png","dollar.png","colon.png","dot.png","plus.png","minus.png"];
-var itemSources = ["","energyCrystal.png","buttonOn.png","buttonOff.png","driveOn.png","driveOff.png","liquidEnergy.png","glassContainor.png","diamond.png","scoreCreate.png","largeMetalAxe.png","metalHammer.png","metalPickaxe.png","metalShovel.png","smallMetalAxe.png"];
-var playerSources = ["player.png","colorPlayer.png","yellowPlayer.png","pinkPlayer.png","purplePlayer.png","LiBluePlayer.png","greenPlayer.png","orangePlayer.png"];
-var blockSources = ["", "grass.png", "wood.png", "stonebrick.png", "dirt.png", "stone.png", "crackedstonebrick.png", "glass.png", "concrete.png", "woodwall.png", "glasswall.png", "stonewall.png", "smoothstone.png", "water.png", "smoothstonewall.png", "redwool.png", "cookie.png", "portal.png", "obsidian.png", "goldBlock.png", "sand.png", "diamondore.png", "rubyore.png", "sapphireore.png", "emeraldore.png", "energyOre.png", "goldore.png", "silverore.png", "ironore.png","leaves.png","switchOn.png","switchOff.png","goldCore.png","coreFrame.png","energyTransfer.png","transferFrame.png","greenScreen.png","storageBlock.png","switchPower.png","log.png","scoreModB.png","scoreModA.png","scoreServerB.png","scoreServerA.png","thruster.png","thrusterEnrich.png","vehController.png","vehTracker.png","white.png","red.png","orange.png","blue.png","brightBlue.png","darkGreen.png","green.png"];
-var swords = ["", "firesword.png","metalsword.png"];
-var hitPointSrcs = ["hitPoint.png","halfPoint.png","noPoint.png"];
-var barFrameSrc = ["blockFrame.png","selectFrame.png"];
+//var energySources = [""];
 var swordData = [
     {
         weapon: "punch",
@@ -159,22 +89,6 @@ var menuData = {
         highlighted:0,
     }
 }
-var vehicleMenu = {
-    type:"gui",
-    purpose:"vehicleBuilder",
-    width:30,
-    height:20,
-    size:8,
-    offsetX:0,
-    offsetY:0,
-    mouseX:0,
-    mouseY:0,
-    map:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,8,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,7,9,14,14,46,47,14,14,14,14,14,14,14,8,8,8,8,16,13,16,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,16,13,16,8,8,8,8,14,14,14,14,14,14,47,46,14,14,9,7,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,7,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,7,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,7,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,7,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,7,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,13,9,14,14,14,14,14,14,14,14,14,14,14,14,14,14,9,7,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,16,13,16,8,8,8,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,8,8,8,16,13,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,9,13,9,14,14,8,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,8,14,14,9,13,9,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,9,13,9,14,14,7,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,7,14,14,9,13,9,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,9,13,9,14,14,7,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,7,14,14,9,13,9,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,14,14,14,14,14,14,9,13,9,14,14,8,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,8,14,14,9,13,9,14,14,14,14,14,14,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,16,13,16,8,8,8,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,8,8,8,16,13,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],[7,9,14,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,9,13,9,8,14,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,14,8,9,13,9,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,7],[7,9,14,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,9,13,9,8,14,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,14,8,9,13,9,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,7],[7,9,14,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,9,13,9,8,14,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,9,14,14,14,14,14,14,14,14,8,9,13,9,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,7],[7,9,14,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,9,13,9,8,14,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,14,8,9,13,9,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,10,10,9,14,14,14,14,14,14,9,7],[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,16,13,16,8,14,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,14,8,16,13,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,14,9,13,9,8,14,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,14,8,9,13,9,14,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,14,9,13,9,8,12,12,12,12,12,12,12,12,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,12,12,12,12,12,12,12,12,8,9,13,9,14,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,14,9,13,9,8,45,45,45,45,45,45,45,45,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,14,14,14,14,14,14,14,8,45,45,45,45,45,45,45,45,8,9,13,9,14,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,8,8,8,44,44,44,44,44,44,44,44,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,44,44,44,44,44,44,44,44,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
-    // map:[
-    //     [1,1,1],
-    //     [1,1,1],
-    // ]
-}
 var vehicleInterface = {
     controls:{
         type:"interface",
@@ -221,19 +135,18 @@ var counter = [
     }
 ]
 var menuActive = [false, menuData.block];
-var energyData = {
+/*var energyData = {
     type: null,
     level: null,
     available: null,
     energyUsed: null,
-    power: 1000,
-}
+    power: ENERGY_DATA_POWER,
+}*/
 function block(y,x,num) {
-    var dBlocks = [[0,false,"air"],[1,3,"grain"],[2,5,"wood"],[3,8,"stone"],[4,3,"grain"],[5,8,"stone"],[6,8,"stone"],[7,3,"brittle"],[8,7,"stone"],[9,5,"wood"],[10,3,"brittle"],[11,8,"stone"],[12,8,"stone"],[13,false,"liquid"],[14,8,"stone"],[15,4,"silk"],[16,5,"cookie"],[17,false,"unknown"],[18,32,"stone"],[19,6,"metal"],[20,3,"grain"],[21,12,"stone"],[22,10,"stone"],[23,10,"stone"],[24,10,"stone"],[25,10,"stone"],[26,9,"stone"],[27,9,"stone"],[28,9,"stone"],[29,2,"grain"],[30,7,0,false,"stone"],[31,7,0,false,"stone"],[32,7,energyData.power,"stone"],[33,7,"stone"],[34,7,1,"stone"],[35,7,0,"stone"],[36,2,"silk"],[37,12,{type:"storage",purpose:"storage",mouseX:0,mouseY:0,row:0,highlighted:0,tabs:0,inventory:[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]]},"metal"],[38,7,0,false,"stone"],[39,5,"wood"],[40,6,0,{type:"interface",purpose:"storage",mouseX:0,mouseY:0,tabs:0,select:[0,0],rows:[[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]]]},"stone"],[41,6,1,{type:"interface",purpose:"storage",mouseX:0,mouseY:0,tabs:0,select:[0,0],rows:[[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]],[[0,"TYPE:"],[1,30,""]]]},"stone"],[42,6,0,[""],"stone"],[43,6,1,[""],"stone"],[44,6,"metal"],[45,6,"metal"],[46,6,"metal"],[47,6,"metal"],[48,6,vehicleMenu,"metal"],[49,6,"metal"],[50,6,"metal"],[51,6,"metal"],[52,6,"metal"],[53,6,"metal"],[54,6,"metal"],[55,6,"metal"]];
-    if(num > dBlocks.length-1 || num < 0){
+    if(num > DBLOCKS.length-1 || num < 0){
         return;
     }
-    map[y][x] = dBlocks[num];
+    map[y][x] = DBLOCKS[num];
 }
 var player = {
     pl: 0,
@@ -487,7 +400,7 @@ function clickBtn(){
         for(var i=0;i<menuActive[1].bSlots;i++){
             for(var j=0;j<menuActive[1].bRows;j++){
                 if(buttonClick(xPos,yPos,yTop-12*(j+1)-50*j,yTop-12*(j+1)-50*(j+1),x+12*(i+1)+50*(i+1),x+12*(i+1)+50*i)){
-                    if(j*menuActive[1].bSlots+i < blockSources.length){
+                    if(j*menuActive[1].bSlots+i < BLOCK_SOURCES.length){
                         menuActive[1].highlighted = j*menuActive[1].bSlots+i;
                     }
                 }
@@ -535,7 +448,7 @@ function clickBtn(){
         for(var i=0;i<menuActive[1].bSlots;i++){
             for(var j=0;j<menuActive[1].bRows;j++){
                 if(buttonClick(xPos,yPos,yTop-12*(j+1)-50*j,yTop-12*(j+1)-50*(j+1),x+12*(i+1)+50*(i+1),x+12*(i+1)+50*i)){
-                    if(j*menuActive[1].bSlots+i < itemSources.length){
+                    if(j*menuActive[1].bSlots+i < ITEM_SOURCES.length){
                         menuActive[1].highlighted = j*menuActive[1].bSlots+i;
                     }
                 }
@@ -941,46 +854,46 @@ function isSolid(val) {
 function gameSetup() {
     if(!loaded){
         loaded = true;
-        for(var j = 0; j < blockSources.length; j++) {
+        for(var j = 0; j < BLOCK_SOURCES.length; j++) {
             textures[j] = document.createElement("IMG");
             if (j != 0) {
-                textures[j].src = 'texture/' + blockSources[j];
+                textures[j].src = 'texture/' + BLOCK_SOURCES[j];
             };
         };
-        for(var j = 0; j < swords.length; j++) {
+        for(var j = 0; j < SWORD_SOURCES.length; j++) {
             wTextures[j] = document.createElement("IMG");
             if (j != 0) {
-                wTextures[j].src = 'texture/' + swords[j];
+                wTextures[j].src = 'texture/' + SWORD_SOURCES[j];
             }
         }
-        for(var j = 0; j < entitySrc.length; j++) {
+        for(var j = 0; j < ENTITY_SOURCES.length; j++) {
             entityImg[j] = document.createElement("IMG");
             if (j != 0) {
-                entityImg[j].src = 'texture/' + entitySrc[j];
+                entityImg[j].src = 'texture/' + ENTITY_SOURCES[j];
             }
         }
         for(var j=0;j<3;j++){
             hitPointImgs[j] = document.createElement("IMG");
-            hitPointImgs[j].src = 'texture/' + hitPointSrcs[j];
+            hitPointImgs[j].src = 'texture/' + HIT_POINT_SOURCES[j];
         }
         for(var j=0;j<2;j++){
             barFrame[j] = document.createElement("IMG");
-            barFrame[j].src = 'texture/' + barFrameSrc[j];
+            barFrame[j].src = 'texture/' + BAR_FRAME_SOURCES[j];
         }
-        for(var j=0;j<playerSources.length;j++){
+        for(var j=0;j<PLAYER_SOURCES.length;j++){
             playerPic[j] = document.createElement("IMG");
-            playerPic[j].src = "texture/"+playerSources[j];
+            playerPic[j].src = "texture/"+PLAYER_SOURCES[j];
         }
-        for(var j=0;j<itemSources.length;j++){
+        for(var j=0;j<ITEM_SOURCES.length;j++){
             iTextures[j] = document.createElement("IMG");
             if (j != 0) {
-                iTextures[j].src = "texture/"+itemSources[j];
+                iTextures[j].src = "texture/"+ITEM_SOURCES[j];
             }
         }
-        for(var j=0;j<charSources.length;j++){
+        for(var j=0;j<CHAR_SOURCES.length;j++){
             characters[j] = document.createElement("IMG");
             if (j != 0) {
-                characters[j].src = "texture/chars/"+charSources[j];
+                characters[j].src = "texture/chars/"+CHAR_SOURCES[j];
             }
         }
         arrowImg = document.createElement("IMG");
@@ -1037,13 +950,13 @@ function processHeightMap(hMap){
         var aVal = height-(hMap[i]+height/2)
         for(var j=0;j<height;j++){
             if(j<aVal){
-                nMap[j].push([0,false,"air"]);
+                nMap[j].push(DBLOCKS[0]);
             } else if (j == aVal){
-                nMap[j].push([1,3,"grain"]);
+                nMap[j].push(DBLOCKS[1]);
             } else if(j > aVal && j < aVal+5){
-                nMap[j].push([4,3,"grain"]);
+                nMap[j].push(DBLOCKS[4]);
             } else if(j >= aVal+5){
-                nMap[j].push([5,8,"stone"]);
+                nMap[j].push(DBLOCKS[5]);
             }
         }
     }
@@ -1248,13 +1161,13 @@ function worldGeneration(){
                 for(var ji=0;ji<distance;ji++){
                     for(var j=0;j<wMap.length;j++){
                         if(j<curY){
-                            wMap[j].push([0,false,"air"]);
+                            wMap[j].push(DBLOCKS[0]);
                         } else if (j == curY){
-                            wMap[j].push([1,3,"grain"]);
+                            wMap[j].push(DBLOCKS[1]);
                         } else if(j > curY && j < curY+5){
-                            wMap[j].push([4,3,"grain"]);
+                            wMap[j].push(DBLOCKS[4]);
                         } else if(j >= curY+5){
-                            wMap[j].push([5,8,"stone"]);
+                            wMap[j].push(DBLOCKS[5]);
                         }
                     }
                 }
@@ -1265,11 +1178,11 @@ function worldGeneration(){
             if(wMap[i][l][0] == 0){
                 // wMap[i][l] = block[13];
                 // block(i,l,13);
-                wMap[i][l] = [13,false,"liquid"]
+                wMap[i][l] = DBLOCKS[13]
             } else if(wMap[i][l][0] == 1){
-                wMap[i][l] = [20,3,"grain"]
-                wMap[i+1][l] = [20,3,"grain"]
-                wMap[i-1][l] = [20,3,"grain"]
+                wMap[i][l] = DBLOCKS[20]
+                wMap[i+1][l] = DBLOCKS[20]
+                wMap[i-1][l] = DBLOCKS[20]
                 
                 // block(i,l,20);
                 // block(i+1,l,20);
@@ -1375,13 +1288,8 @@ function menuPress(num){
 function buttonClick(x,y,t,b,r,l){
     return x <= r && x >= l && y <= t && y >= b;
 }
-var colors = [
-    [1,"#0caa21"],[2,"#754f08"],[3,"#525252"],[4,"#4e3307"],[5,"#686868"],[6,"#525252"],[7,"#cef5f8"],[8,"#e0ebeb"],[9,"#382404"],[10,"#929292"],[11,"#444444"],[12,"#c2c2c2"],[13,"#1551d1"],[14,"#6e6e6e"],[15,"#831e1e"],[16,"#97612e"],[17,"#120425"],[18,"#050111"],[19,"#e6a510"],[20,"#f6ea7c"],
-    [21,"#75efff"],[22,"#eb4848"],[23,"#4853eb"],[24,"#5ce473"],[25,"#ffcb88"],[26,"#ffe388"],[27,"#e7e7e7"],[28,"#b68e5b"],[29,"#2e8618"],[30,"#ffe54f"],[31,"#5d5d5d"],[32,"#ffe54f"],[33,"#5d5d5d"],[34,"#ffe54f"],[35,"#5d5d5d"],[36,"#62f050"],[37,"#1d1d1d"],[38,"#dfc535"],[39,"#462f0a"],[40,"#d5dfdf"],
-    [41,"#46f3f3"],[42,"#d5dfdf"],[43,"#46f3f3"],[44,"#46f3f3"],[45,"#46f3f3"],[46,"#46f3f3"],[47,"#e6cd43"],
-]
 function drawMenu(){
-    ctx.fillStyle = "#969696";
+    ctx.fillStyle = MENU_MID_BG;
     var tab = 0;
     if(menuActive[1].tabs > 0){
         tab = 1;
@@ -1392,13 +1300,13 @@ function drawMenu(){
     var xPos = (disp.width-mWidth)/2;
     var yPos = (disp.height-mHeight)/2;
     ctx.fillRect(xPos,yPos,mWidth,mHeight);
-    ctx.fillStyle = "#787878";
+    ctx.fillStyle = MENU_DARK_BG;
         for(var i=0;i<menuActive[1].bSlots;i++){
             for(var j=0;j<menuActive[1].bRows;j++){
-                if(j*menuActive[1].bSlots+i < blockSources.length){
-                    ctx.fillStyle = "#787878";
+                if(j*menuActive[1].bSlots+i < BLOCK_SOURCES.length){
+                    ctx.fillStyle = MENU_DARK_BG;
                     if(j*menuActive[1].bSlots+i == menuActive[1].highlighted){
-                        ctx.fillStyle = "#a7a7a7";
+                        ctx.fillStyle = MENU_LIGHT_BG;
                     }
                     ctx.fillRect(xPos+12+i*62,yPos+12+j*62,50,50);
                     drawSquare(xPos+12+i*62+7,yPos+12+j*62+7,j*menuActive[1].bSlots+i,2);
@@ -1414,9 +1322,9 @@ function drawMenu(){
         ctx.fillRect(xPos,yPos,mWidth,mHeight);
         for(var i=0;i<menuActive[1].bSlots;i++){
             for(var j=0;j<menuActive[1].trades.length;j++){
-                ctx.fillStyle = "#787878";
+                ctx.fillStyle = MENU_DARK_BG;
                 if(j*menuActive[1].bSlots+i == menuActive[1].highlighted+menuActive[1].row*menuActive[1].bSlots){
-                    ctx.fillStyle = "#a7a7a7";
+                    ctx.fillStyle = MENU_LIGHT_BG;
                 }
                 if(i == 2){
                     ctx.drawImage(arrowImg, 0, 0, 36, 36, Math.ceil((xPos+12+i*62+7)*1), Math.ceil((yPos+12+j*62+7)*1), Math.ceil(36*1), Math.ceil(36*1));
@@ -1442,12 +1350,12 @@ function drawMenu(){
         var xPos = (disp.width-mWidth)/2;
         var yPos = (disp.height-mHeight)/2;
         ctx.fillRect(xPos,yPos,mWidth,mHeight);
-        ctx.fillStyle = "#787878";
+        ctx.fillStyle = MENU_DARK_BG;
         for(var i=0;i<bSlots;i++){
             for(var j=0;j<bRows;j++){
-                ctx.fillStyle = "#787878";
+                ctx.fillStyle = MENU_DARK_BG;
                 if(i == menuActive[1].highlighted && j == menuActive[1].row){
-                    ctx.fillStyle = "#a7a7a7";
+                    ctx.fillStyle = MENU_LIGHT_BG;
                 }
                 ctx.fillRect(xPos+12+i*62,yPos+12+j*62,50,50);
                 //remove the 2 at the end by chaning up the data stored in the inventory so you can add things other than just blocks into the storage and stacking up to 99 in one spot
@@ -1461,13 +1369,13 @@ function drawMenu(){
         var xPos = (disp.width-mWidth)/2;
         var yPos = (disp.height-mHeight)/2;
         ctx.fillRect(xPos,yPos,mWidth,mHeight);
-        ctx.fillStyle = "#787878";
+        ctx.fillStyle = MENU_DARK_BG;
         for(var i=0;i<menuActive[1].bSlots;i++){
             for(var j=0;j<menuActive[1].bRows;j++){
-                if(j*menuActive[1].bSlots+i < itemSources.length){
-                    ctx.fillStyle = "#787878";
+                if(j*menuActive[1].bSlots+i < ITEM_SOURCES.length){
+                    ctx.fillStyle = MENU_DARK_BG;
                     if(j*menuActive[1].bSlots+i == menuActive[1].highlighted){
-                        ctx.fillStyle = "#a7a7a7";
+                        ctx.fillStyle = MENU_LIGHT_BG;
                     }
                     ctx.fillRect(xPos+12+i*62,yPos+12+j*62,50,50);
                     drawItem(xPos+12+i*62+7,yPos+12+j*62+7,j*menuActive[1].bSlots+i);
@@ -1498,9 +1406,9 @@ function drawMenu(){
                         }
                     }
                 } else if(menuActive[1].rows[i][j][0] == 1 || menuActive[1].rows[i][j][0] == 2 || menuActive[1].rows[i][j][0] == 3){
-                    ctx.fillStyle = "#787878";
+                    ctx.fillStyle = MENU_DARK_BG;
                     if(menuActive[1].select[0] == i && menuActive[1].select[1] == j){
-                        ctx.fillStyle = "#a7a7a7";
+                        ctx.fillStyle = MENU_LIGHT_BG;
                     }
                     var rectWidth = menuActive[1].rows[i][j][1] * 20;
                     ctx.fillRect(xPos+6+(tLen*20),yPos+4+(36*i),rectWidth-2,26);
@@ -1579,13 +1487,11 @@ function drawMenu(){
         };
     }
 }
-function getColor(val){
-    for(var i=0;i<colors.length;i++){
-        if(colors[i][0] == val){
-            return colors[i][1];
-        }
+function getColor(blockId){
+    if (blockId < 0 || blockId >= BLOCK_COLORS.length) {
+        return "#000000";
     }
-    return "#000000";
+    return BLOCK_COLORS[blockId]
 }
 function guiSquare(x, y, val) {
     if (val != 0) {
@@ -1601,10 +1507,10 @@ function drawTab(bRows,bSlots,tab){
         var yPos = (disp.height-mHeight)/2;
         for(var i=0;i<menuActive[1].tabs;i++){
             if(i != menuActive[1].tabActive-1){
-                ctx.fillStyle = "#787878";
+                ctx.fillStyle = MENU_DARK_BG;
                 ctx.fillRect(xPos+12+i*92,yPos+12+bRows*62,80,80);
             } else if(i == menuActive[1].tabActive-1){
-                ctx.fillStyle = "#a7a7a7";
+                ctx.fillStyle = MENU_LIGHT_BG;
                 ctx.fillRect(xPos+12+i*92,yPos+12+bRows*62,80,80);
             }
             if(i == 0){
@@ -1684,7 +1590,7 @@ function drawMobileControls() {
     var translateX = 0;
     var btnY = disp.height - btnWH * translateY;
     var btnX = btnWH * translateX;
-    ctx.fillStyle = "#6d7070";
+    ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
     ctx.fillRect(btnX, btnY, btnWH, btnWH);
 }
 function overlap(i, j, l, t, r, b) {
@@ -3153,9 +3059,9 @@ function gameCharacter() {
         //if(menuActive[0] && menuActive[1].purpose == "vehicle") { renderSize = 1; } // Vehicle zoom
     ctx.clearRect(0, 0, disp.width, disp.height);
     if(time == "day"){
-        ctx.fillStyle = "#0e9dd6";
+        ctx.fillStyle = COLOR_SKY_DAY;
     } else if(time == "night"){
-        ctx.fillStyle = "#0c0330";
+        ctx.fillStyle = COLOR_SKY_NIGHT;
     }
     ctx.fillRect(0, 0, disp.width, disp.height);
     var jLeft = Math.floor((gameOffsetX-mapCoord.x)/36);
@@ -3314,7 +3220,7 @@ function gameCharacter() {
             var cpb = playersPos[i].pb;
             var x = cpl - gameOffsetX;
             var y = gameOffsetY + disp.height - cpt;
-            if(playersPos[i].color >= 0 && playersPos[i].color < playerSources.length){
+            if(playersPos[i].color >= 0 && playersPos[i].color < PLAYER_SOURCES.length){
                 ctx.drawImage(playerPic[playersPos[i].color], 0, 0, 34, 69, x, y, cpr - cpl, cpt - cpb);
             } else {
                 ctx.drawImage(playerPic[0], 0, 0, 34, 69, x, y, cpr - cpl, cpt - cpb);
@@ -3328,7 +3234,7 @@ function gameCharacter() {
             }
         };
     };
-    if(player.color >= 0 && player.color < playerSources.length){
+    if(player.color >= 0 && player.color < PLAYER_SOURCES.length){
         ctx.drawImage(playerPic[player.color], 0, 0, 34, 69, (player.pl - gameOffsetX)*renderSize,(gameOffsetY + disp.height - player.pt)*renderSize,(player.pr - player.pl)*renderSize,(player.pt - player.pb)*renderSize);
     } else {
         ctx.drawImage(playerPic[0], 0, 0, 34, 69, (player.pl - gameOffsetX)*renderSize,(gameOffsetY + disp.height - player.pt)*renderSize,(player.pr - player.pl)*renderSize,(player.pt - player.pb)*renderSize);
