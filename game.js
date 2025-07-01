@@ -1855,7 +1855,7 @@ function rayCast(x,y,angle){
     return ret;
 }
 function fallDamage(vel,type){
-    var KE = 61/2*(vel*vel);
+    //var KE = 61/2*(vel*vel);
     if(player.inWater){
         return;
     }else if(vel > 17 || vel < -17){
@@ -1872,6 +1872,10 @@ function fallDamage(vel,type){
             vel *= 1.6;
         }
         if(type[0] == "player"){
+            if (gameOptions.godMode) {
+                // No fall damage allowed in god mode
+                return;
+            }
             player.health -= Math.ceil(vel);
         } else if(type[0] == "entity"){
             entities[type[1]].health -= Math.ceil(vel);
@@ -2597,7 +2601,11 @@ function useControls(){
     // var scrollBackgroundY = false;
     if(!menuActive[0]){
         if (controls.keys[3][1]) {
-            speed *= 1.7;
+            if (gameOptions.godMode == 1) {
+                speed *= 3.3;
+            } else {
+                speed *= 1.7;
+            }
             if (player.inWater) {
                 jump *= 1.4;
             };
@@ -2608,9 +2616,11 @@ function useControls(){
                 gravity *= 2.6;
             };
         };
-        if (controls.keys[0][1] && player.jumping == false) {
+        if (controls.keys[0][1] && (player.jumping == false || gameOptions.godMode == 1)) {
+            // Jump
             player.velY += jump;
             player.jumping = true;
+            player.velY = Math.min(player.velY, 20);
         };
         if (controls.keys[1][1]) {
             player.velX -= 0.5;
