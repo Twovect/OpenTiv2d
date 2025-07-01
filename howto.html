@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tivect | How To Play</title>
+    <link rel="stylesheet" href="launcher.css">
+    <style>
+    </style>
+</head>
+<body>
+    <div class="infoBox">
+        <div class="infoTopBar">
+            <h2>How to Play</h2>
+            <button class="mainButton mainSmaller" onclick="window.location.href='index.html'">
+                Back to Game
+            </button>
+        </div>
+        <div class="infoDescr">
+            Tivect is a 2d free exploration game: "singleplayer and multiplayer, PvP, PvE, build". The goal of the OpenTiv2d project is to expand this freedom for players by finishing what <a class="textlink" href="https://game.tivect.com">the original Tivect project</a> started: taking the base game and opening back up popular discontinued features while improving performance, accessibility, and customizability.
+        </div>
+        <div class="infoDescr">
+            Tivect is a project rich in development history. Its controls take a while to get used to, but they are loved by the community and help differentiate the game from competitors. Feel free to reference this list while playing:
+        </div>
+        <!-- This lister gets populated by the script below -->
+        <div id="lister" class="lister">
+        </div>
+    </div>
+
+    <script>
+        // New controls display
+        // Old one is located at <https://docs.google.com/document/d/18fUm-6iEq-AkJIB1oj6v7OFTgnYx2kYPNfkooLVXb9k/edit?usp=sharing>
+        const CONTROLS = [
+            {
+                title: "a",
+                actual: "a",
+                mechanic: "Move left"
+            },
+            {
+                title: "d",
+                actual: "d",
+                mechanic: "Move right"
+            },
+            {
+                title: "w",
+                actual: "w",
+                mechanic: "Sprint"
+            },
+            {
+                title: "s",
+                actual: "s",
+                mechanic: "Slow down"
+            },
+            {
+                title: "[space]",
+                actual: " ",
+                mechanic: "Jump"
+            },
+            {
+                title: "` (~)",
+                actual: "`",
+                mechanic: "Open inventory menu"
+            },
+            {
+                title: "1/2/3/4/5",
+                actual: "1/2/3/4/5",
+                mechanic: "Switch held item bar slot"
+            },
+            {
+                title: "f",
+                actual: "f",
+                mechanic: "Drop held item"
+            },
+            {
+                title: "Left Click",
+                actual: "Left Click",
+                mechanic: "Mine the block under the cursor, or place your currently held block there. If the block has an interface and you are holding an item, open the interface"
+            },
+        ];
+
+        const lister = document.getElementById("lister");
+
+        for (const control of CONTROLS) {
+            lister.innerHTML += '<div class="listrow">'
+                + '<div><span class="codetext">' + control.title + '</span></div>'
+                + '<span>' + control.mechanic + '</span>';
+        }
+    </script>
+</body>
+</html>

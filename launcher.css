@@ -2,7 +2,6 @@ body, html {
     margin:0;
     height:100%;
     width:100%;
-    overflow: hidden;
 }
 
 body {
@@ -14,8 +13,13 @@ body {
     --teal-accent: #088181;
     --bg-dark: #131414;
     --bg-mid: #1d1f1f;
+    --bg-mid2: #161818;
 
     color: var(--text);
+}
+
+h2 {
+    margin: 0px;
 }
 
 .noScrollBar::-webkit-scrollbar{
@@ -47,6 +51,7 @@ input[type="text"]:focus, input[type="number"]:focus {
     display: flex;
     flex-direction: row;
     height: 100%;
+    overflow: hidden;
 }
 #launcher{
     position:relative;
@@ -107,7 +112,7 @@ input[type="text"]:focus, input[type="number"]:focus {
     background-color: blue;
     border: solid 1px black;
 }
-#start{
+.mainButton{
     height:70px;
     width:275px;
     background-color: var(--bg-mid);
@@ -117,14 +122,19 @@ input[type="text"]:focus, input[type="number"]:focus {
     font-weight: 200px;
     outline: none;
 }
-#start:hover{
+.mainButton:hover{
     cursor: pointer; 
-    background-color:#161818;
+    background-color: var(--bg-mid2);
     border-width: 3px;
 }
-#start:active{
+.mainButton:active{
     cursor:pointer;
     border-color:#d3d3d3;
+}
+.mainSmaller {
+    height: 50px;
+    width: 200px;
+    font-size: 22px;
 }
 #gameMode{
     width:120px;
@@ -178,7 +188,7 @@ input[type="text"]:focus, input[type="number"]:focus {
     min-width:165px;
     width:20%;
     background-color: var(--bg-mid);
-    border-right: solid 3px #161818;
+    border-right: solid 3px var(--bg-mid2);
     z-index: 5;
     display: flex;
     flex-direction: column;
@@ -189,8 +199,8 @@ input[type="text"]:focus, input[type="number"]:focus {
     width:100%;
     height:50px;
     margin-top: 20px;
-    border:solid 3px #161818;
-    background-color: #161818;
+    border:solid 3px var(--bg-mid2);
+    background-color: var(--bg-mid2);
     color: var(--text);
     font-size:120%;
     font-weight: 500;
@@ -201,7 +211,7 @@ input[type="text"]:focus, input[type="number"]:focus {
 }
 .menuButton:active{
     cursor:pointer;
-    background-color: #161818;
+    background-color: var(--bg-mid2);
     border-color:#121313;
 }
 #menuTtl{
@@ -210,7 +220,7 @@ input[type="text"]:focus, input[type="number"]:focus {
     margin-bottom: 20px;
     width:100%;
     height:70px;
-    background-color:#161818;
+    background-color: var(--bg-mid2);
     color: var(--text);
     font-size:50px;
     padding-top: 10px;
@@ -265,4 +275,59 @@ input[type="text"]:focus, input[type="number"]:focus {
     100%{
         transform: rotate(360deg);
     }
+}
+
+/* Info pages */
+.infoBox{
+    position: absolute;
+    width:75%;
+    transform:translateX(-50%);
+    left:50%;
+    border: solid 4px var(--bg-mid2);
+    background-color: var(--bg-mid);
+    padding: 20px 24px;
+}
+.infoTopBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.infoDescr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.lister {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+}
+.listrow {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    border: solid 2px var(--border-color);
+    width: 100%;
+}
+.listrow > * {
+    padding: 12px;
+    width: 150px;
+    font-weight: bold;
+}
+.listrow > :last-child {
+    border-left: solid 2px var(--border-color);
+    padding: 12px;
+    border-right: none;
+    flex-grow: 1;
+    font-weight: normal;
+}
+.codetext {
+    background-color: var(--bg-dark);
+    font-family: monospace;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
