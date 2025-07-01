@@ -15,6 +15,10 @@ document.getElementById("importData").addEventListener("click", () => {
     // Get the file
     document.getElementById("saveFile").click();
 });
+document.getElementById("importVehicleData").addEventListener("click", () => {
+    // Get the file
+    document.getElementById("saveFile").click();
+});
 
 document.getElementById("gameMode").onclick = function switchMode() {
     if(gameMode == "Singleplayer"){
@@ -29,8 +33,13 @@ document.getElementById("gameMode").onclick = function switchMode() {
 // TODO: make dependencies nicer here (include gamef earlier, maybe?)
 // TODO: make loading save files actually work
 document.getElementById("saveFile").addEventListener("change", () => {
-    readSave()
+    readSave();
 });
+
+function finishLoad(loadedTitle) {
+    console.log("Loaded file: " + loadedTitle);
+    document.getElementById("importedDataLister").innerHTML += "<span class=\"codetext\">" + loadedTitle + "</span>";
+}
 
 // GAME OPTIONS
 function generateSeed() {

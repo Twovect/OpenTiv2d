@@ -87,13 +87,33 @@ input[type="text"]:focus, input[type="number"]:focus {
     align-items: flex-start;
     text-align: left;
 }
-#innersettings{
+#settingspaddingprovider {
+    flex-grow: 1;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: flex-start;
+    text-align: left;
+    padding: 10px;
+    gap: 0px;
+}
+.innersettings{
     display: flex;
     flex-direction: column;
     justify-content: left;
     align-items: flex-start;
     text-align: left;
-    padding: 20px;
+    padding: 10px;
+    gap: 0px;
+}
+.innersettingsframe{
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: flex-start;
+    text-align: left;
+    padding: 0px;
     gap: 0px;
 }
 .settingbox {
@@ -136,7 +156,7 @@ input[type="text"]:focus, input[type="number"]:focus {
     width: 200px;
     font-size: 22px;
 }
-#gameMode{
+.specialButton{
     width:120px;
     height:40px;
     top:20px;
@@ -147,13 +167,24 @@ input[type="text"]:focus, input[type="number"]:focus {
     font-weight: 200px;
     outline: none;
 }
-#gameMode:hover{
+.specialButton:hover{
     cursor:pointer;
     background-color: var(--border-color);
 }
-#gameMode:active{
+.specialButton:active{
     cursor:pointer;
     border-color: var(--bg-mid);
+}
+.fullWidth {
+    width: 100%;
+}
+.importedDataLister {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
 }
 #startButtons{
     display: flex;

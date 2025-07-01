@@ -394,43 +394,49 @@ function vehColSides(veh){
     }
     return values;
 }
+
+/** Read a save file, process it, and call finishLoad once file is read */
 function readSave() {
     loadData.usingData = true;
     const readFile = new FileReader();
     var file = document.getElementById("saveFile").files[0];
+
     readFile.onload = function (ev) {
         var fullData = ev.target.result.split("|||");
-        if(fullData[0] == "tivect-world"){
+        if (fullData[0] == "tivect-world" || fullData[0] == "tivect-worldsave") {
             loadData.saveFile = JSON.parse(fullData[1])
             loadData.dataLoaded = true;
-        } else {
-            if(fullData[0] == "tivect-vehicle"){
-                var vehicleMap = JSON.parse(fullData[1]);
-                var vehicleAdd = {
-                    id:genItemID(),
-                    movingLeft:false,
-                    movingRight:false,
-                    movingUp:false,
-                    movingDown:false,
-                    cruise:false,
-                    inVehicle: -1,
-                    xSpeed: 1,
-                    ySpeed: 1,
-                    maxXspeed:10000,
-                    maxYspeed:10000,
-                    x:0,
-                    y:0,
-                    velX:0,
-                    velY:0,
-                    map:null,
-                    vertices:null,
-                    properties:null,
-                }
-                vehicleAdd.map = vehicleMap.vehicle;
-                vehicleAdd.vertices = vehColSides(vehicleMap.vehicle);
-                vehicles.push(vehicleAdd);
+            finishLoad("Save file (loaded)");
+        } else if (fullData[0] == "tivect-vehicle") {
+            var vehicleMap = JSON.parse(fullData[1]);
+            var vehicleAdd = {
+                id:genItemID(),
+                movingLeft:false,
+                movingRight:false,
+                movingUp:false,
+                movingDown:false,
+                cruise:false,
+                inVehicle: -1,
+                xSpeed: 1,
+                ySpeed: 1,
+                maxXspeed:10000,
+                maxYspeed:10000,
+                x:0,
+                y:0,
+                velX:0,
+                velY:0,
+                map:null,
+                vertices:null,
+                properties:null,
             }
+            vehicleAdd.map = vehicleMap.vehicle;
+            vehicleAdd.vertices = vehColSides(vehicleMap.vehicle);
+            vehicles.push(vehicleAdd);
             loadData.usingData = false;
+            finishLoad("Vehicle file (loaded)");
+        } else {
+            loadData.usingData = false;
+            finishLoad("Unknown file (not loaded)");
         }
     }
     readFile.readAsText(file, "UTF-8");
