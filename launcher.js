@@ -11,11 +11,7 @@ function displayScreen(screenName){
 }
 
 // MENU OPTIONS
-document.getElementById("importData").addEventListener("click", () => {
-    // Get the file
-    document.getElementById("saveFile").click();
-});
-document.getElementById("importVehicleData").addEventListener("click", () => {
+document.getElementById("importDataButton").addEventListener("click", () => {
     // Get the file
     document.getElementById("saveFile").click();
 });

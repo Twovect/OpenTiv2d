@@ -13,7 +13,7 @@ function changeSize(amount){
     if(change){
         size += amount;
         reLoadCanv();
-        document.getElementById("sizeVal").innerHTML = size;
+        document.getElementById("sizeVal").innerHTML = "Zoom: " + size;
     }
 }
 var enVals = [32,34,35,30,31,38,40,41,42,43];

@@ -1,12 +1,12 @@
 const selection = document.getElementById("blocks");
 const cx = selection.getContext("2d");
-selection.height = 400;
-selection.width = 400;
+
+const BLOCK_DISP_COLUMNS = 6;
+const BLOCK_DISP_ROWS = 10;
+selection.height = 50 * BLOCK_DISP_ROWS;
+selection.width = 50 * BLOCK_DISP_COLUMNS;
 // selection.width = 266;
 var textures = [];
-var data = {
-    slots:8,
-}
 renderSize = 1
 function setUpBlocks(){
     for(var j = 0; j < BLOCK_SOURCES.length; j++) {
@@ -27,11 +27,11 @@ function clickBtn(ev){
     var rect = selection.getBoundingClientRect();
     var xPos = ev.clientX - rect.left;
     var yPos = ev.clientY - rect.top;
-    for(var j=0;j<Math.ceil(BLOCK_SOURCES.length/data.slots);j++){
-        for(var i=0;i<data.slots;i++){
+    for(var j=0;j<Math.ceil(BLOCK_SOURCES.length/BLOCK_DISP_COLUMNS);j++){
+        for(var i=0;i<BLOCK_DISP_COLUMNS;i++){
             if(buttonClick(xPos,yPos,(36*j)+(16*j)+36,(36*j)+(16*j),(36*i)+(16*i)+36,(36*i)+(16*i))){
-                if(j*data.slots+i < BLOCK_SOURCES.length){
-                    blockSelect = j*data.slots+i;
+                if(j*BLOCK_DISP_COLUMNS+i < BLOCK_SOURCES.length){
+                    blockSelect = j*BLOCK_DISP_COLUMNS+i;
                     render2();
                     render();
                 }
@@ -52,10 +52,10 @@ function render(){
     cx.clearRect(0, 0, selection.width, selection.height);
     var val=0;
     for(var i=0;i<BLOCK_SOURCES.length;i++){
-        if((val*data.slots+data.slots)-i == 0){
+        if((val*BLOCK_DISP_COLUMNS+BLOCK_DISP_COLUMNS)-i == 0){
             val++;
         }
-        drawBlock((i-(val*data.slots))*(36+16),val*(36+16),i);
+        drawBlock((i-(val*BLOCK_DISP_COLUMNS))*(36+16),val*(36+16),i);
     }
 }
 setUpBlocks();

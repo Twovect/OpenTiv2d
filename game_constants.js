@@ -108,7 +108,14 @@ const BLOCK_COLORS = [
     "#46f3f3",
     "#46f3f3",
     "#46f3f3",
-    "#e6cd43"
+    "#e6cd43",
+    "#ffffff",
+    "#ed3d40",
+    "#f46e1a",
+    "#0f41d8",
+    "#1dd2f2",
+    "#014f05",
+    "#4fd138"
 ];
 const DBLOCKS = [
     [0,false,"air"],
