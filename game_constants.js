@@ -61,6 +61,7 @@ const COLOR_NIGHT_CANVAS_TINT = "#00000060";
 // BLOCK TYPES
 const ENERGY_DATA_POWER = 1000;
 const BLOCK_COLORS = [
+    "#badbad", // Should never be used; necessary for indexing
     "#0caa21",
     "#754f08",
     "#525252",
