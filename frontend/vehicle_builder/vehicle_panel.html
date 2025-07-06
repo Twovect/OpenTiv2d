@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>tivect - Vehicle Creator</title>
+    <meta name="description" content="Site to construct a custom vehicle for your world">
+    <meta property="og:url" content="https://tivect.com/vehicleBuilder/vehiclePanel.html">
+    <meta property="og:title" content="Vehicle Panel">
+    <meta property="og:image" content="assets/icon.png">
+    <meta property="og:image:secure_url" content="assets/icon.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="Site to construct a custom vehicle for your world">
+    <link rel="stylesheet" href="../assets/styles.css">
+    <script defer="defer" src="../game_constants.js"></script>
+    <script defer="defer" src="mod_map.js"></script>
+    <script defer="defer" src="main.js"></script>
+    <script defer="defer" src="blocks.js"></script>
+    <script defer="defer" src="selected.js"></script>
+    <style>
+    .mainScreenFullHeight {
+        height: 100%;
+        overflow-y: scroll;
+    }
+    .bottomSection {
+        padding: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 30px;
+    }
+    .bottomSubsection {
+        > * {
+            margin-bottom: 10px;
+        }
+        max-width: 500px;
+    }
+    .sizeButton{
+        text-align: center;
+        width: 40px;
+    }
+    .sizeControls{
+        display: flex;
+        flex-direction: row;
+        font-family: sans-serif;
+        align-items: center;
+        gap: 10px;
+    }
+    canvas {
+        display: block;
+    }
+    </style>
+</head>
+<body class="noScrollBar">
+    <div id="mainMenuScreen">
+        <div id="leftMenu" class="noScrollBar">
+            <h1 id="menuTtl">tivect</h1>
+            <a href="../index.html">
+                <button class="menuButton">Back to Game</button>
+            </a>
+            <input hidden="hidden" id="saveFile" type="file" onchange="readSave()">
+            <a hidden="hidden" id="downloadSave" download="vehicle.tivect" href="data:text/plain;charset=UTF-8,tivect-vehicle%7C%7C%7C%7B%22vehicle%22%3A%5B%5B0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C0%2C5%2C5%2C5%5D%2C%5B0%2C0%2C0%2C0%2C0%2C0%2C9%2C9%2C9%2C0%2C0%2C0%5D%2C%5B1%2C1%2C1%2C8%2C8%2C8%2C0%2C0%2C0%2C0%2C0%2C0%5D%5D%7D"></a>
+
+        </div>
+        <div class="mainScreenFullHeight">
+            <canvas id="map" height="400" width="650"></canvas>
+            <div class="bottomSection">
+                <div class="bottomSubsection">
+                    <h2>Block selection</h2>
+                    <canvas id="blocks" height="400" width="400"></canvas>
+                    <!-- <div id="dataOut" class="noScrollBar"></div> -->
+                    <canvas id="selected" height="84" width="84"></canvas>
+                </div>
+                <div class="bottomSubsection">
+                    <h2>Navigation</h2>
+                    <div class="sizeControls">
+                        <button class="specialButton sizeButton" onclick="changeSize(1)">+</button>
+                        <button class="specialButton sizeButton" onclick="changeSize(-1)">-</button>
+                        <span id="sizeVal">Zoom: 16</span>
+                    </div>
+                    <span>Use the arrow keys to pan the view around the map.</span>
+                    <span>Click to place the currently selected block</span>
+                    <br>
+                    <br>
+                    <h2>File</h2>
+                    <div id="settings">
+                        <div class="innersettings">
+                            <div class="fullWidth">
+                                <button id="importTivect" class="specialButton fullWidth" onclick="getFile()">
+                                    + Upload
+                                    <span class="codetext">.tivect</span>
+                                    file (overrides current vehicle!)
+                                </button>
+                                <button id="downloadTivect" class="specialButton fullWidth" onclick="saveVehicle()">
+                                    &#8595; Download this vehicle as
+                                    <span class="codetext">.tivect</span>
+                                    file
+                                </button>
+                                <button id="downloadTivect" class="specialButton fullWidth" onclick="saveVehicleCustom()">
+                                    &#8595; Download this vehicle for the Java engine
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <h2>Help</h2>
+                    <span>Select blocks with the panel to the left, then click on the map above to place them. This will build up a vehicle that you can save in the File menu.</span>
+                    <br>
+                    <span>If you include the <img src="../assets/textures/vehController.png" /> block, it will serve as the vehicle controller, letting players interact with it to fly the vehicle!</span>
+                    <br>
+                    <span>Some of the darker blocks act as <i>background blocks</i>, meaning they're just for appearances and players can walk in front of them. Consider using these for the interiors of your vehicle.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

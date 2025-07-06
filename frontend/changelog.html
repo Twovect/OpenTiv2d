@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tivect | Changelog</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+    </style>
+</head>
+<body>
+    <div class="infoBox">
+        <div class="infoTopBar">
+            <h2>Changelog</h2>
+            <button class="mainButton mainSmaller" onclick="window.location.href='index.html'">
+                Back to Game
+            </button>
+        </div>
+        <div class="infoDescr">
+            Tivect is a 2d free exploration game: "singleplayer and multiplayer, PvP, PvE, build". The goal of the OpenTiv2d project is to expand this freedom for players by finishing what <a class="textlink" href="https://game.tivect.com">the original Tivect project</a> started: taking the base game and opening back up popular discontinued features while improving performance, accessibility, and customizability.
+        </div>
+        <div class="infoDescr">
+            The following are the major changes implemented by <b>the OpenTiv2d project</b>:
+        </div>
+        <!-- This lister gets populated by the script below -->
+        <div id="lister" class="lister">
+        </div>
+        <div class="infoDescr">
+            The following is the release history of <b>the original Tivect game</b>, verbatim from its original developer:
+        </div>
+        <div id="lister2" class="lister">
+        </div>
+    </div>
+
+    <script>
+        // New changelog display
+        const CHANGELOG_OPENTIV2D = [
+            {
+                date: "2025-07-06",
+                notes: [
+                    "Fixed containers",
+                    "Improved documentation",
+                ]
+            },
+            {
+                date: "2025-07-02",
+                notes: [
+                    "Added Changelog",
+                    "Improved menu style consistency for the Vehicle Creator and Changelog",
+                ]
+            },
+            {
+                date: "2025-07-01",
+                notes: [
+                    "Added customization settings and new worldgen options",
+                ]
+            },
+            {
+                date: "2025-06-29",
+                notes: [
+                    "Started the OpenTiv2d project by refactoring constants and improving loading performance by <b>100x</b>!",
+                ]
+            },
+        ];
+        const CHANGELOG_TIVECT = [
+            {
+                date: "08-18-2022",
+                notes: [
+                    "Vehicle collision boxes are fully functioning",
+                    "The top collision box on vehicles are now properly funcitoning",
+                ]
+            },
+            {
+                date: "08-16-2022",
+                notes: [
+                    "The visual glitch with vehicles while using multiplayer is resolved",
+                ]
+            },
+            {
+                date: "07-28-2022",
+                notes: [
+                    "Vehicles now have accurate collision boxes",
+                    "Vehicle Panel can now have files compatible with the java version and the website uploaded",
+                    "Vehicle Panel bugs have been fixed",
+                ]
+            },
+            {
+                date: "05-17-2022",
+                notes: [
+                    "Vehicle UI has been cleaned up",
+                    "Cruise Control has been added for vehicles",
+                    "Cruise control is activated by pressing (c)",
+                    "The Vehicle Panel has been added as an external website",
+                ]
+            },
+            {
+                date: "05-06-2022",
+                notes: [
+                    "The development of a custom Java 2D engine has started",
+                ]
+            },
+            {
+                date: "03-27-2022",
+                notes: [
+                    "Game has received the following tools",
+                    "Big Axe - Breaks wood blocks faster",
+                    "Sledge Hammer - Breaks stone blocks faster",
+                    "Pickaxe - Breaks stone blocks faster",
+                    "Shovel - Breaks grain blocks faster",
+                    "Small Axe - Breaks wood blocks faster",
+                ]
+            },
+            {
+                date: "03-19-2022",
+                notes: [
+                    "Blocks now break by holding down the mouse button",
+                    "Cursor can be dragged from block to block instead of clicking a new block each time",
+                    "Clicking to break a block still works but is slower",
+                ]
+            },
+            {
+                date: "03-14-2022",
+                notes: [
+                    "Game now plays normally regardless of refresh rate being above 60",
+                ]
+            },
+            {
+                date: "03-06-2022",
+                notes: [
+                    "Expiremental version of vehicles update has been added",
+                ]
+            },
+            {
+                date: "02-22-2022",
+                notes: [
+                    "Custom ingame upper case letters and numbers 0-9 have been added",
+                    "Counters have been added to the game",
+                    "Counters can keep track of a value with a prefix or suffix",
+                    "New interface block that uses text has been added",
+                    "New interface can take text/number inputs and/or display text/numbers",
+                    "Energy System has received blocks that are unique to the system",
+                ]
+            },
+            {
+                date: "02-14-2022",
+                notes: [
+                    "Moving too fast will now result in a teleport back to your original position in multiplayer",
+                ]
+            },
+            {
+                date: "02-07-2022",
+                notes: [
+                    "Energy System is now server side",
+                    "Throwing items is now server side",
+                    "Server now runs on 14 tps over 10 tps",
+                    "The server has been heavily modified fixing many small issues",
+                ]
+            },
+            {
+                date: "01-30-2022",
+                notes: [
+                    "Energy System is now fully functioning",
+                    "The switch block for the energy system has been added",
+                    "The remote button item has been added",
+                ]
+            },
+            {
+                date: "01-28-2022",
+                notes: [
+                    "Items can now be dropped by pressing F",
+                ]
+            },
+            {
+                date: "01-20-2022",
+                notes: [
+                    "Multiplayer server no longer disconnects the user after 5 seconds",
+                ]
+            },
+            {
+                date: "01-18-2022",
+                notes: [
+                    "Changelog added",
+                    "Multiplayer is in game and working",
+                    "Objects can no longer be placed inside of players/entities",
+                    "You can no longer spawn inside of water",
+                    "Energy (Electrical) System is still not working",
+                ]
+            },
+        ];
+
+        const lister = document.getElementById("lister");
+        for (const chg of CHANGELOG_OPENTIV2D) {
+            let newHTML = '<div class="listrow">'
+                + '<div>' + chg.date + '</div>'
+                + '<span>';
+            for (const note of chg.notes) {
+                newHTML += '- ' + note + '<br>';
+            }
+            newHTML += '</span>';
+            lister.innerHTML += newHTML;
+        }
+
+        const lister2 = document.getElementById("lister2");
+        for (const chg of CHANGELOG_TIVECT) {
+            let newHTML = '<div class="listrow">'
+                + '<div>' + chg.date + '</div>'
+                + '<span>';
+            for (const note of chg.notes) {
+                newHTML += '- ' + note + '<br>';
+            }
+            newHTML += '</span>';
+            lister2.innerHTML += newHTML;
+        }
+    </script>
+</body>
+</html>
