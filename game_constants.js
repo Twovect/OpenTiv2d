@@ -155,11 +155,20 @@ const DBLOCKS = [
     [34,7,1,"stone"],
     [35,7,0,"stone"],
     [36,2,"silk"],
-    [37,12,{type:"storage",purpose:"storage",mouseX:0,mouseY:0,row:0,highlighted:0,tabs:0,inventory:[
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0]]
+    [37,12,{
+        type:"storage",
+        purpose:"storage",
+        mouseX:0,
+        mouseY:0,
+        row:0,
+        highlighted:0,
+        tabs:0,
+        inventory:[
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0]
+        ]
     },"metal"],
     [38,7,0,false,"stone"],
     [39,5,"wood"],

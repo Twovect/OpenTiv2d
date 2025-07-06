@@ -171,6 +171,11 @@ var player = {
     onBlocks:[],
     inventory: {type:"storage",purpose:"inventory",mouseX:0,mouseY:0,row:0,tabs:4,tabActive:1,highlighted:0,inventory:[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]]},
     itemBar:[
+        // Documentation:
+        // clickAction: (???)
+        // select: which block ID is selected
+        // amount: (???)
+        // data: (???)
         {clickAction:2,select:0,amount:true,data:[null,null]},
         {clickAction:2,select:0,amount:true,data:[null,null]},
         {clickAction:2,select:0,amount:true,data:[null,null]},
@@ -1212,6 +1217,8 @@ function drawSword(x,y,val,swordSize){
 function drawWeapon() {
     ctx.drawImage(wTextures[player.itemBar[player.selected].select], 0, 0, 24, 90, player.pl - gameOffsetX - 8, gameOffsetY + disp.height - player.pt + 3, 12, 45);
 }
+
+// Select an item in the menu
 function menuPress(num){
     if(menuActive[1].type == "blockMenu"){
         player.itemBar[num-1].data = [null,null];
@@ -1236,15 +1243,18 @@ function menuPress(num){
             player.itemBar[num-1].select = menuActive[1].trades[menuActive[1].row][1];
         }
     } else if(menuActive[1].type == "storage"){
-        if(player.itemBar[num-1].select != 0 && menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted][0] == 0){
-            menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted][0] = player.itemBar[num-1].select;
+        if(player.itemBar[num-1].select != 0 && menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted] == 0){
+            // Put from the item bar into the menu
+            menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted] = player.itemBar[num-1].select;
             player.itemBar[num-1].select = 0;
-        } else if(player.itemBar[num-1].select == 0 && menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted][0] != 0){
-            player.itemBar[num-1].select = menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted][0]
+        } else if (player.itemBar[num-1].select == 0 && menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted][0] != 0) {
+            // Put from the menu into the item bar
+            player.itemBar[num-1].select = menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted]
             menuActive[1].inventory[menuActive[1].row][menuActive[1].highlighted] = 0;
         }
     }
 }
+
 function buttonClick(x,y,t,b,r,l){
     return x <= r && x >= l && y <= t && y >= b;
 }
@@ -2705,16 +2715,15 @@ function useControls(){
             // vehicles[menuActive[1].isVehicle].movingRight = true;
         }
     }
-    //
-    //floor is lava code
+
+    // Legacy comment: floor is lava code
     //
     // for(var f=0;f<player.onBlocks.length;f++){
     //     if(player.onBlocks[f] == 1 || player.onBlocks[f] == 4){
     //         respawn();
     //     }
     // }
-    //
-    //
+
     if (controls.keys[7][1]) {
         controls.keys[7][1] = false;
         if(menuActive[0]){
@@ -2863,22 +2872,32 @@ function useControls(){
                     }
                 }
             }
-            if(validBlockClick(blockY,blockX)){
+            // Check for interactive blocks
+            if (
+                validBlockClick(blockY,blockX)
+                && player.itemBar[player.selected].select == 0
+                /*&& player.itemBar[player.selected].clickAction == 0*/
+            ) {
                 var val = map[blockY][blockX];
-                if(player.itemBar[player.selected].select == 0 && player.itemBar[player.selected].clickAction == 0){
-                    if(val[0] == 37){
-                        menuActive[1] = map[blockY][blockX][2];
-                        menuActive[0] = true;
-                    } else if(val[0] == 41 && val[2] > 0){
-                        menuActive[1] = map[blockY][blockX][3];
-                        menuActive[0] = true;
-                    } else if(val[0] == 43 && val[2] > 0){
-
-                    }
+                if(val[0] == 37){
+                    // Storage block
+                    menuActive[1] = map[blockY][blockX][2];
+                    menuActive[0] = true;
                     placeBlock = false;
+                } else if(val[0] == 41 && val[2] > 0){
+                    menuActive[1] = map[blockY][blockX][3];
+                    menuActive[0] = true;
+                    placeBlock = false;
+                } else if(val[0] == 43 && val[2] > 0){
+
                 }
             }
-            if(validBlockClick(blockY,blockX) && player.itemBar[player.selected].clickAction != null && placeBlock){
+            // Place/dig if not already interacted with something
+            if (
+                validBlockClick(blockY,blockX)
+                && player.itemBar[player.selected].clickAction != null
+                && placeBlock
+            ) {
                 var dmgVal = 1;
                 var tool = isTool();
                 if ((player.itemBar[player.selected].clickAction == 2 || tool != -1) && validBlockClick(blockY,blockX)) {
