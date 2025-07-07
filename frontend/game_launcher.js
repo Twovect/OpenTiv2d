@@ -144,6 +144,15 @@ serverURLInput.addEventListener("change", e => {
     multiplayerServerURL = e.target.value;
 });
 
+// CHECK FOR MOBILE
+let isMobile = true;
+
+// Debugging
+const debugCheck = document.getElementById("in-debugcheck");
+debugCheck.addEventListener("click", (e) => {
+    isMobile = debugCheck.checked;
+});
+
 // Launch the game with the start button
 document.getElementById("start").addEventListener("click", async () => {
     // Legacy comment: "fix this it is partially working"

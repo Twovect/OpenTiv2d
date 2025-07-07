@@ -15,3 +15,9 @@ Run the server
 ```sh
 npm run start
 ```
+
+## Connecting to the server
+
+To access your local server, type `ws://localhost:PORT` (with `PORT` replaced by your port number, such as `5002`).
+
+However, `ws` is insecure so using `wss` is preferred. According to the original developer, `wss` requires an SSL certificate and is needed to run if others want to connect to your server.

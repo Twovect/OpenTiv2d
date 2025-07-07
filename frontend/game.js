@@ -1554,15 +1554,121 @@ function interfaceType(key){
     }
 
 }
-function drawMobileControls() {
-    var btnWH = disp.width * 0.07;
-    var translateY = 2;
-    var translateX = 0;
-    var btnY = disp.height - btnWH * translateY;
-    var btnX = btnWH * translateX;
-    ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
-    ctx.fillRect(btnX, btnY, btnWH, btnWH);
+
+// MOBILE
+function getMobileDimensions() {
+    const BUTTON_WIDTH = 60;
+    const BUTTON_CONTAINER_WIDTH = 70;
+    const navX = 10;
+    const navY = disp.height / 2 - BUTTON_WIDTH;
+
+    return {
+        buttonWidth: BUTTON_WIDTH,
+        buttonContainerWidth: BUTTON_CONTAINER_WIDTH,
+        inMenu: {
+            close: {
+                x: 20,
+                y: 20
+            }
+        },
+        inNormal: {
+            navL: {
+                x: navX,
+                y: navY
+            },
+            navR: {
+                x: navX + BUTTON_CONTAINER_WIDTH * 2,
+                y: navY
+            },
+            navU: {
+                x: navX + BUTTON_CONTAINER_WIDTH,
+                y: navY + BUTTON_CONTAINER_WIDTH
+            },
+            navD: {
+                x: navX + BUTTON_CONTAINER_WIDTH,
+                y: navY - BUTTON_CONTAINER_WIDTH
+            },
+            jump: {
+                x: disp.width - BUTTON_WIDTH * 2,
+                y: disp.height / 2 - BUTTON_WIDTH
+            }
+        }
+    };
 }
+const MOBILE_CONTROL_MAP = {
+    close: "`", // controls.keys[7], which equals "`"
+    navL: "A",
+    navR: "D",
+    navU: "W",
+    navD: "S",
+    jump: " "
+};
+
+function drawMobileControls(isMenuActive) {
+    const mobileDim = getMobileDimensions();
+    ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
+    if (isMenuActive) {
+        for (const [buttonName, loc] of Object.entries(mobileDim.inMenu)) {
+            ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
+        }
+    } else {
+        for (const [buttonName, loc] of Object.entries(mobileDim.inNormal)) {
+            ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
+        }
+    }
+}
+
+function clickMobileControls(xPos, yPos, isMenuActive) {
+    console.log("Checking clicked mobile controls: " + xPos + ", " + yPos);
+    const mobileDim = getMobileDimensions();
+    const clickedButtonNames = [];
+    const notClickedButtonNames = [];
+    if (isMenuActive) {
+        for (const [buttonName, loc] of Object.entries(mobileDim.inMenu)) {
+            // Check if mouse is within dimensions
+            if (
+                xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
+                && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
+            ) {
+                clickedButtonNames.push(buttonName);
+            } else {
+                notClickedButtonNames.push(buttonName);
+            }
+        }
+    } else {
+        for (const [buttonName, loc] of Object.entries(mobileDim.inNormal)) {
+            // Check if mouse is within dimensions
+            if (
+                xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
+                && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
+            ) {
+                clickedButtonNames.push(buttonName);
+            } else {
+                notClickedButtonNames.push(buttonName);
+            }
+        }
+    }
+    // Deal with the buttons clicked
+    for (const buttonName of clickedButtonNames) {
+        console.log("Clicked " + buttonName);
+        if (MOBILE_CONTROL_MAP[buttonName]) {
+            controls.control({
+                type: "keydown",
+                key: MOBILE_CONTROL_MAP[buttonName]
+            });
+        }
+    }
+    for (const buttonName of notClickedButtonNames) {
+        console.log("Unclicked " + buttonName);
+        if (MOBILE_CONTROL_MAP[buttonName]) {
+            controls.control({
+                type: "keyup",
+                key: MOBILE_CONTROL_MAP[buttonName]
+            });
+        }
+    }
+}
+
 function overlap(i, j, l, t, r, b) {
     var bt = (36 * (map.length - i))+mapCoord.y;
     var bl = mapCoord.x+j * 36;
@@ -2768,6 +2874,7 @@ function useControls(){
     }
     changeClick();
     if(controls.click[0] && canHoldClick){
+        // Currently clicking
         canHoldClick = false;
         setTimeout(function(){
             canHoldClick = true;
@@ -2781,10 +2888,18 @@ function useControls(){
         var xPo = controls.click[1]-rect.left;
         var yPo = disp.height - controls.click[2];
         if(menuActive[0]){
+            // Handle clicking in menu
             menuActive[1].mouseX = xPo;
             menuActive[1].mouseY = yPo;
+            if (isMobile) {
+                clickMobileControls(xPo, disp.height - yPo, true);
+            }
             clickBtn();
         } else {
+            // Handle clicking outside of a menu
+            if (isMobile) {
+                clickMobileControls(xPo, disp.height - yPo, false);
+            }
             for(var i=0;i<entities.length;i++){
                 if(entities[i].type == 2 && buttonClick(xPo,yPo,entities[i].pt-gameOffsetY,entities[i].pb-gameOffsetY,entities[i].pr-gameOffsetX,entities[i].pl-gameOffsetX)){
                     menuActive[1] = entities[i].traderMenu;
@@ -3300,8 +3415,9 @@ function renderFrame() {
     //     rays[i] = rayCast(player.pl+17,player.pt-15,(0.15625*i));
     //     ctx.lineTo();
     // }
-    if (mobileControls) {
-        drawMobileControls();
+    //if (mobileControls) {
+    if (isMobile) {
+        drawMobileControls(menuActive[0]);
     }
     if (gameCharacterActive) {
         setTimeout(window.requestAnimationFrame(renderFrame),1000/60);
