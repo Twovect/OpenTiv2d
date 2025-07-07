@@ -153,6 +153,10 @@ document.getElementById("start").addEventListener("click", async () => {
     displayScreen("loading");
     await (new Promise(res => setTimeout(res, 1)));
     if (gameMode == "Multiplayer" && !loadServerData.usingData) {
+        // Set up and connect to multiplayer server
+        await setUpWs(multiplayerServerURL);
+        // TODO: FIX WHY????
+        await (new Promise(res => setTimeout(res, 1)));
         loadServerData.usingData = true;
         ws.send(`joinrequest|${sid}`);
         load = setInterval(loadGame,100);
@@ -160,9 +164,5 @@ document.getElementById("start").addEventListener("click", async () => {
     loadGame();
     // The game should have finished loading
     displayScreen("game");
-    /*document.getElementById("mainScreen").style.display = "none";
-    document.getElementById("bodysplit").style.display = "none";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("amc05").style.display = "inline";*/
     setTimeout(dataLoaded,5000);
 });

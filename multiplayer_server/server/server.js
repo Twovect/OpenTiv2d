@@ -515,6 +515,7 @@ function genSid(){
     return credential;
 }
 function reGenSid(){
+    // TODO: fix? (set it to var)
     clients2 = {};
     for(var i=0;i<sids.length;i++){
         var newSid = genSid();
