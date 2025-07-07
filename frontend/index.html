@@ -50,27 +50,46 @@
                 <div id="bottomMenu">
                     <div id="startBar">
                         <div id="startButtons">
-                            <button id="gameMode" class="specialButton">Singleplayer</button>
+                            <button id="gameMode" style="width: fit-content;" class="specialButton">
+                                <span id="singleplayer-disp" style="font-weight: bold;">Singleplayer</span>
+                                |
+                                <span id="multiplayer-disp" style="color: var(--textlight)">Multiplayer</span>
+                            </button>
                             <button class="mainButton" id="start">Play</button>
                         </div>
                     </div>
                     <div id="settings">
                         <div id="settingspaddingprovider">
-                            <div class="innersettings">
-                                <div class="settingbox">
-                                    <span>World Width</span>
-                                    <input id="in-worldWidth" type="text" placeholder="World Width">
+                            <div id="singleplayer-settings" class="innersettingsframe">
+                                <div class="innersettings">
+                                    <div class="settingbox">
+                                        <span>World Width</span>
+                                        <input id="in-worldWidth" type="text" placeholder="World Width">
+                                    </div>
+                                    <div class="settingbox">
+                                        <span>Seed</span>
+                                        <input id="in-seed" type="text" placeholder="Seed">
+                                    </div>
+                                    <div class="settingbox">
+                                        <span>
+                                            Worldgen:
+                                            <i id="worldgenMethodText"></i>
+                                        </span>
+                                        <input id="in-worldgenMethod" type="number" placeholder="Method">
+                                    </div>
                                 </div>
-                                <div class="settingbox">
-                                    <span>Seed</span>
-                                    <input id="in-seed" type="text" placeholder="Seed">
-                                </div>
-                                <div class="settingbox">
-                                    <span>
-                                        Worldgen:
-                                        <i id="worldgenMethodText"></i>
-                                    </span>
-                                    <input id="in-worldgenMethod" type="number" placeholder="Method">
+                                <div class="innersettings">
+                                    <div class="settingbox">
+                                        <div class="fullWidth">
+                                            <button id="importDataButton" class="specialButton fullWidth">
+                                                + Import
+                                                <span class="codetext">.tivect</span>
+                                                file with data
+                                            </button>
+                                            <div id="importedDataLister" class="importedDataLister">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="innersettingsframe">
@@ -85,17 +104,10 @@
                                         <input id="in-godMode" type="number" placeholder="Method">
                                     </div>
                                 </div>
-                                <div class="innersettings">
+                                <div id="multiplayer-settings" class="innersettings" style="width: 400px; display: none;" >
                                     <div class="settingbox">
-                                        <div class="fullWidth">
-                                            <button id="importDataButton" class="specialButton fullWidth">
-                                                + Import
-                                                <span class="codetext">.tivect</span>
-                                                file with data
-                                            </button>
-                                            <div id="importedDataLister" class="importedDataLister">
-                                            </div>
-                                        </div>
+                                        <span>Server URL</span>
+                                        <input id="in-serverUrl" type="text" placeholder="ws://... or wss://..." style="width: 245px;" value="http://localhost:5002">
                                     </div>
                                 </div>
                             </div>

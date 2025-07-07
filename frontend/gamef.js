@@ -1,7 +1,7 @@
 // Try to connect
 // const ws = new WebSocket("wss://server.tivect.com");
 // TODO: menu for connecting to server
-const ws = new WebSocket("ws://localhost:5002");
+let ws = undefined;
 
 var sid;
 var gameMode = "Singleplayer";
@@ -19,272 +19,285 @@ var loadServerData = {
     spawnPointLoaded: false,
 }
 var load = null;
-ws.onmessage = function (e) {
-    var res = JSON.parse(e.data);
-    if(res.type == "--") {
-        ws.send(`--|${sid}`);
-    }
-    if(multi){
-        if (res.type == "position") {
-            var coordSend;
-            var vehicleSend;
-            if(menuActive[0] && menuActive[1].purpose == "vehicle"){
-                veh = vehicles[menuActive[1].isVehicle];
-                vehicleSend = `true|${veh.id}|${veh.x}|${veh.y}|${veh.xSpeed}|${veh.ySpeed}|${veh.movingLeft}|${veh.movingRight}|${veh.movingUp}|${veh.movingDown}|${veh.velX}|${veh.velY}`;
-            } else {
-                vehicleSend = `false`;
+
+async function setUpWs(url) {
+    return new Promise(resolve => {
+        ws = new WebSocket(url);
+
+        ws.onopen = function (e) {
+            console.log("WS LOADED");
+            resolve();
+        }
+
+        ws.onmessage = function (e) {
+            var res = JSON.parse(e.data);
+            if(res.type == "--") {
+                ws.send(`--|${sid}`);
             }
-            if(player.inVehicle != -1){
-                vehicle = vehicles[player.inVehicle];
-                coordSend = `${player.pl-vehicle.x}|${player.pr-vehicle.x}|${player.pt-vehicle.y}|${player.pb-vehicle.y}`;
-            } else {
-                coordSend = `${player.pl}|${player.pr}|${player.pt}|${player.pb}`;
-            }
-            // console.log(coordSend)
-            ws.send(`position|${coordSend}|${controls.keys[3][1]}|${controls.keys[4][1]}|${controls.keys[1][1]}|${controls.keys[2][1]}|${controls.keys[0][1]}|${player.inWater}|${player.inLeaves}|${player.jumping}|${player.velX}|${player.velY}|${player.itemBar[player.selected].select}|${player.itemBar[player.selected].clickAction}|${player.inVehicle}|${player.color}|${vehicleSend}|${sid}`);
-            if (vehicles.length != res.vehicles.length) {
-                //send a request for the vehicles
-            } else {
-                for (var i = 0; i < vehicles.length; i++) {
-                    var xRange = 1;
-                    var yRange = 1;
-                    if((vehicles[i].movingLeft || vehicles[i].movingRight) && !(vehicles[i].movingLeft && vehicles[i].movingRight)){
-                        xRange = 6;
+            if(multi){
+                if (res.type == "position") {
+                    var coordSend;
+                    var vehicleSend;
+                    if(menuActive[0] && menuActive[1].purpose == "vehicle"){
+                        veh = vehicles[menuActive[1].isVehicle];
+                        vehicleSend = `true|${veh.id}|${veh.x}|${veh.y}|${veh.xSpeed}|${veh.ySpeed}|${veh.movingLeft}|${veh.movingRight}|${veh.movingUp}|${veh.movingDown}|${veh.velX}|${veh.velY}`;
+                    } else {
+                        vehicleSend = `false`;
                     }
-                    if((vehicles[i].movingUp || vehicles[i].movingDown) && !(vehicles[i].movingDown && vehicles[i].movingDown)){
-                        yRange = 6;
+                    if(player.inVehicle != -1){
+                        vehicle = vehicles[player.inVehicle];
+                        coordSend = `${player.pl-vehicle.x}|${player.pr-vehicle.x}|${player.pt-vehicle.y}|${player.pb-vehicle.y}`;
+                    } else {
+                        coordSend = `${player.pl}|${player.pr}|${player.pt}|${player.pb}`;
                     }
-                    if (Math.abs(vehicles[i].x - res.vehicles[i].x) > xRange || Math.abs(vehicles[i].y - res.vehicles[i].y) > yRange) {
-                        // entityInVehicle(i,res.vehicles[i].x - vehicles[i].x, res.vehicles[i].y - vehicles[i].y)
-                        // for(var i=0;i<playersPos.length;i++){
-                            
-                        // }
-                        //
-                        // for(var j=0;j<vehicles.length;j++){
-                        //     if(vehicles[j].inVehicle == val){
-                        //         vehicles[j].x += xChange;
-                        //         vehicles[j].y += yChange;
-                        //         //something funky goes on here when too fast going left or up idk
-                        //         entityInVehicle(j,xChange,yChange)
-                        //     }
-                        // }
-                        var xChange = res.vehicles[i].x - vehicles[i].x;
-                        var yChange = res.vehicles[i].y - vehicles[i].y;
-                        if(player.inVehicle == i){
-                            gameOffsetX += xChange;
-                            gameOffsetY += yChange;
-                            player.pl += xChange;
-                            player.pr += xChange;
-                            player.pt += yChange;
-                            player.pb += yChange;
-                        }
-                        for(var j=0;j<entities.length;j++){
-                            if(entities[j].inVehicle == i){
-                                entities[j].pl += xChange;
-                                entities[j].pr += xChange;
-                                entities[j].pt += yChange;
-                                entities[j].pb += yChange;
+                    // console.log(coordSend)
+                    ws.send(`position|${coordSend}|${controls.keys[3][1]}|${controls.keys[4][1]}|${controls.keys[1][1]}|${controls.keys[2][1]}|${controls.keys[0][1]}|${player.inWater}|${player.inLeaves}|${player.jumping}|${player.velX}|${player.velY}|${player.itemBar[player.selected].select}|${player.itemBar[player.selected].clickAction}|${player.inVehicle}|${player.color}|${vehicleSend}|${sid}`);
+                    if (vehicles.length != res.vehicles.length) {
+                        //send a request for the vehicles
+                    } else {
+                        for (var i = 0; i < vehicles.length; i++) {
+                            var xRange = 1;
+                            var yRange = 1;
+                            if((vehicles[i].movingLeft || vehicles[i].movingRight) && !(vehicles[i].movingLeft && vehicles[i].movingRight)){
+                                xRange = 6;
+                            }
+                            if((vehicles[i].movingUp || vehicles[i].movingDown) && !(vehicles[i].movingDown && vehicles[i].movingDown)){
+                                yRange = 6;
+                            }
+                            if (Math.abs(vehicles[i].x - res.vehicles[i].x) > xRange || Math.abs(vehicles[i].y - res.vehicles[i].y) > yRange) {
+                                // entityInVehicle(i,res.vehicles[i].x - vehicles[i].x, res.vehicles[i].y - vehicles[i].y)
+                                // for(var i=0;i<playersPos.length;i++){
+
+                                // }
+                                //
+                                // for(var j=0;j<vehicles.length;j++){
+                                //     if(vehicles[j].inVehicle == val){
+                                //         vehicles[j].x += xChange;
+                                //         vehicles[j].y += yChange;
+                                //         //something funky goes on here when too fast going left or up idk
+                                //         entityInVehicle(j,xChange,yChange)
+                                //     }
+                                // }
+                                var xChange = res.vehicles[i].x - vehicles[i].x;
+                                var yChange = res.vehicles[i].y - vehicles[i].y;
+                                if(player.inVehicle == i){
+                                    gameOffsetX += xChange;
+                                    gameOffsetY += yChange;
+                                    player.pl += xChange;
+                                    player.pr += xChange;
+                                    player.pt += yChange;
+                                    player.pb += yChange;
+                                }
+                                for(var j=0;j<entities.length;j++){
+                                    if(entities[j].inVehicle == i){
+                                        entities[j].pl += xChange;
+                                        entities[j].pr += xChange;
+                                        entities[j].pt += yChange;
+                                        entities[j].pb += yChange;
+                                    }
+                                }
+                                for(var j=0;j<playersPos.length;j++){
+                                    // console.log(playersPos[j].inVehicle)
+                                    if(playersPos[j].inVehicle == i){
+                                        // console.log(xChange+" "+yChange)
+                                        playersPos[j].pl += xChange;
+                                        playersPos[j].pr += xChange;
+                                        playersPos[j].pt += yChange;
+                                        playersPos[j].pb += yChange;
+                                        // playersPos[j].vehX = xChange;
+                                        // playersPos[j].vehY = yChange;
+                                    }
+                                }
+                                //
+                                vehicles[i].x = res.vehicles[i].x;
+                                vehicles[i].y = res.vehicles[i].y;
+                                vehicles[i].xSpeed = res.vehicles[i].xSpeed;
+                                vehicles[i].ySpeed = res.vehicles[i].ySpeed;
+                                vehicles[i].velX = res.vehicles[i].velX;
+                                vehicles[i].velY = res.vehicles[i].velY;
+                                vehicles[i].inVehicle = res.vehicles[i].inVehicle;
+                                vehicles[i].movingLeft = res.vehicles[i].movingLeft;
+                                vehicles[i].movingRight = res.vehicles[i].movingRight;
+                                vehicles[i].movingUp = res.vehicles[i].movingUp;
+                                vehicles[i].movingDown = res.vehicles[i].movingDown;
+                            } else {
+                                // var vehX = vehicles[i].x;
+                                // var vehY = vehicles[i].y;
+                                // entityInVehicle(i,res.vehicles[i].x - vehicles[i].x, res.vehicles[i].y - vehicles[i].y)
+                                vehicles[i].xSpeed = res.vehicles[i].xSpeed;
+                                vehicles[i].ySpeed = res.vehicles[i].ySpeed;
+                                vehicles[i].velX = res.vehicles[i].velX;
+                                vehicles[i].velY = res.vehicles[i].velY;
+                                vehicles[i].inVehicle = res.vehicles[i].inVehicle;
+                                vehicles[i].movingLeft = res.vehicles[i].movingLeft;
+                                vehicles[i].movingRight = res.vehicles[i].movingRight;
+                                vehicles[i].movingUp = res.vehicles[i].movingUp;
+                                vehicles[i].movingDown = res.vehicles[i].movingDown;
+                                // vehicles[i].x = vehX;
+                                // vehicles[i].y = vehY;
                             }
                         }
-                        for(var j=0;j<playersPos.length;j++){
-                            // console.log(playersPos[j].inVehicle)
-                            if(playersPos[j].inVehicle == i){
-                                // console.log(xChange+" "+yChange)
-                                playersPos[j].pl += xChange;
-                                playersPos[j].pr += xChange;
-                                playersPos[j].pt += yChange;
-                                playersPos[j].pb += yChange;
-                                // playersPos[j].vehX = xChange;
-                                // playersPos[j].vehY = yChange;
+                    }
+                    if (playersPos.length != res.players.length) {
+                        playersPos = res.players;
+                    } else {
+                        for (var i=0;i<playersPos.length;i++) {
+                            var xRange = 2;
+                            var yRange = 10;
+                            if((playersPos[i].pa || playersPos[i].pd) && !(playersPos[i].pa && playersPos[i].pd)){
+                                xRange = 6;
+                                if(playersPos[i].pw){
+                                    xRange = 12;
+                                }
                             }
+                            var xAdd = 0;
+                            var yAdd = 0;
+                            if(res.players[i].inVehicle != -1){
+                                // if(Math.abs(playersPos[i].pl - res.players[i].pl - (playersPos[i].vehX - res.players[i].pl)) > xRange+vehicles[playersPos[i].inVehicle].xSpeed|| Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY) > yRange){
+
+                                // }
+                                // var vehAdd = playersPos[i].inVehicle
+                                // xAdd = res.vehicles[vehAdd].x - playersPos[i].vehX;
+                                // yAdd = res.vehicles[vehAdd].y - playersPos[i].vehY;
+                                var vehicle = vehicles[res.players[i].inVehicle];
+                                xAdd = vehicle.x;
+                                yAdd = vehicle.y;
+
+                            }
+                            // if(Math.abs(playersPos[i].pl - res.players[i].pl - (playersPos[i].vehX - res.players[i].pl)) > xRange+vehicles[playersPos[i].inVehicle].xSpeed|| Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY) > yRange){
+                            //     // console.log((res.players[i].pl - playersPos[i].vehX)+" "+(res.players[i].pb - playersPos[i].vehY))
+                            //     console.log(Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY))
+                            //     playersPos[i] = res.players[i]; 
+                            // } else {
+                            //     var ppl = playersPos[i].pl;
+                            //     var ppr = playersPos[i].pr;
+                            //     var ppt = playersPos[i].pt;
+                            //     var ppb = playersPos[i].pb;
+                            //     playersPos[i] = res.players[i];
+                            //     playersPos[i].pl = ppl;
+                            //     playersPos[i].pr = ppr;
+                            //     playersPos[i].pt = ppt;
+                            //     playersPos[i].pb = ppb;
+                            // 
+                            // console.log(xAdd)
+                            // console.log(Math.abs(playersPos[i].pl - res.players[i].pl) - xAdd)
+                            // console.log(res.players[i].inVehicle+" "+playersPos[i].inVehicle)
+                            // playersPos[i].inVehicle = res.players[i].inVehicle;
+                            if (Math.abs(playersPos[i].pl - (res.players[i].pl + xAdd)) > xRange|| Math.abs(playersPos[i].pb - (res.players[i].pb + yAdd)) > yRange) {
+                                playersPos[i] = res.players[i];
+                                playersPos[i].pl += xAdd;
+                                playersPos[i].pr += xAdd;
+                                playersPos[i].pt += yAdd;
+                                playersPos[i].pb += yAdd;
+                            } else {
+                                var ppl = playersPos[i].pl;
+                                var ppr = playersPos[i].pr;
+                                var ppt = playersPos[i].pt;
+                                var ppb = playersPos[i].pb;
+                                playersPos[i] = res.players[i];
+                                playersPos[i].pl = ppl;
+                                playersPos[i].pr = ppr;
+                                playersPos[i].pt = ppt;
+                                playersPos[i].pb = ppb;
+                            }
+                            // if(playersPos[i].inVehicle != -1){
+                            //     playersPos[i].vehX = res.vehicles[playersPos[i].inVehicle].x;
+                            //     playersPos[i].vehY = res.vehicles[playersPos[i].inVehicle].y;
+                            // }
                         }
-                        //
-                        vehicles[i].x = res.vehicles[i].x;
-                        vehicles[i].y = res.vehicles[i].y;
-                        vehicles[i].xSpeed = res.vehicles[i].xSpeed;
-                        vehicles[i].ySpeed = res.vehicles[i].ySpeed;
-                        vehicles[i].velX = res.vehicles[i].velX;
-                        vehicles[i].velY = res.vehicles[i].velY;
-                        vehicles[i].inVehicle = res.vehicles[i].inVehicle;
-                        vehicles[i].movingLeft = res.vehicles[i].movingLeft;
-                        vehicles[i].movingRight = res.vehicles[i].movingRight;
-                        vehicles[i].movingUp = res.vehicles[i].movingUp;
-                        vehicles[i].movingDown = res.vehicles[i].movingDown;
-                    } else {
-                        // var vehX = vehicles[i].x;
-                        // var vehY = vehicles[i].y;
-                        // entityInVehicle(i,res.vehicles[i].x - vehicles[i].x, res.vehicles[i].y - vehicles[i].y)
-                        vehicles[i].xSpeed = res.vehicles[i].xSpeed;
-                        vehicles[i].ySpeed = res.vehicles[i].ySpeed;
-                        vehicles[i].velX = res.vehicles[i].velX;
-                        vehicles[i].velY = res.vehicles[i].velY;
-                        vehicles[i].inVehicle = res.vehicles[i].inVehicle;
-                        vehicles[i].movingLeft = res.vehicles[i].movingLeft;
-                        vehicles[i].movingRight = res.vehicles[i].movingRight;
-                        vehicles[i].movingUp = res.vehicles[i].movingUp;
-                        vehicles[i].movingDown = res.vehicles[i].movingDown;
-                        // vehicles[i].x = vehX;
-                        // vehicles[i].y = vehY;
                     }
+
+
+
                 }
-            }
-            if (playersPos.length != res.players.length) {
-                playersPos = res.players;
-            } else {
-                for (var i=0;i<playersPos.length;i++) {
-                    var xRange = 2;
-                    var yRange = 10;
-                    if((playersPos[i].pa || playersPos[i].pd) && !(playersPos[i].pa && playersPos[i].pd)){
-                        xRange = 6;
-                        if(playersPos[i].pw){
-                            xRange = 12;
+                if(res.type == "mountVehicle"){
+                    for(var i=0;i<vehicles.length;i++){
+                        if(vehicles[i].id == res.id){
+                            menuActive[1] = vehicleInterface.controls;
+                            menuActive[1].isVehicle = i;
+                            menuActive[0] = true;
+                            return;
                         }
                     }
-                    var xAdd = 0;
-                    var yAdd = 0;
-                    if(res.players[i].inVehicle != -1){
-                        // if(Math.abs(playersPos[i].pl - res.players[i].pl - (playersPos[i].vehX - res.players[i].pl)) > xRange+vehicles[playersPos[i].inVehicle].xSpeed|| Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY) > yRange){
-
-                        // }
-                        // var vehAdd = playersPos[i].inVehicle
-                        // xAdd = res.vehicles[vehAdd].x - playersPos[i].vehX;
-                        // yAdd = res.vehicles[vehAdd].y - playersPos[i].vehY;
-                        var vehicle = vehicles[res.players[i].inVehicle];
-                        xAdd = vehicle.x;
-                        yAdd = vehicle.y;
-
+                }
+                if(res.type == "teleport"){
+                    player.pl = res.pos.pl;
+                    player.pr = res.pos.pr;
+                    player.pb = res.pos.pb;
+                    player.pt = res.pos.pt;
+                    gameOffsetY = player.pb-(disp.height/2)+1;
+                    gameOffsetX = player.pl-(disp.width/2)+1;
+                }
+                if(res.type == "addProjectile"){
+                    projectiles.push(res.projectile);
+                }
+                if(res.type == "delProjectile"){
+                    removeProjectile(res.projId);
+                }
+                if(res.type == "block"){
+                    if(validBlockClick(res.sBlock.y,res.sBlock.x)){
+                        var prevBlock = map[res.sBlock.y][res.sBlock.x];
+                        setWorldBlockToId(res.sBlock.y,res.sBlock.x,res.sBlock.bId);
+                        if(activeEnBlock(res.sBlock.bId) != 0 && activeEnBlock(prevBlock[0]) == 1){
+                            energyRemoveT(res.sBlock.x,res.sBlock.y,res.sBlock.bId,prevBlock[2]);
+                        }
+                        if(activeEnBlock(res.sBlock.bId) != -1){
+                            energyPlace(res.sBlock.x,res.sBlock.y,res.sBlock.bId);
+                        }
                     }
-                        // if(Math.abs(playersPos[i].pl - res.players[i].pl - (playersPos[i].vehX - res.players[i].pl)) > xRange+vehicles[playersPos[i].inVehicle].xSpeed|| Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY) > yRange){
-                        //     // console.log((res.players[i].pl - playersPos[i].vehX)+" "+(res.players[i].pb - playersPos[i].vehY))
-                        //     console.log(Math.abs(playersPos[i].pb - res.players[i].pb) + (res.players[i].pb - playersPos[i].vehY))
-                        //     playersPos[i] = res.players[i]; 
-                        // } else {
-                        //     var ppl = playersPos[i].pl;
-                        //     var ppr = playersPos[i].pr;
-                        //     var ppt = playersPos[i].pt;
-                        //     var ppb = playersPos[i].pb;
-                        //     playersPos[i] = res.players[i];
-                        //     playersPos[i].pl = ppl;
-                        //     playersPos[i].pr = ppr;
-                        //     playersPos[i].pt = ppt;
-                        //     playersPos[i].pb = ppb;
-                        // 
-                        // console.log(xAdd)
-                    // console.log(Math.abs(playersPos[i].pl - res.players[i].pl) - xAdd)
-                    // console.log(res.players[i].inVehicle+" "+playersPos[i].inVehicle)
-                    // playersPos[i].inVehicle = res.players[i].inVehicle;
-                    if (Math.abs(playersPos[i].pl - (res.players[i].pl + xAdd)) > xRange|| Math.abs(playersPos[i].pb - (res.players[i].pb + yAdd)) > yRange) {
-                        playersPos[i] = res.players[i];
-                        playersPos[i].pl += xAdd;
-                        playersPos[i].pr += xAdd;
-                        playersPos[i].pt += yAdd;
-                        playersPos[i].pb += yAdd;
-                    } else {
-                        var ppl = playersPos[i].pl;
-                        var ppr = playersPos[i].pr;
-                        var ppt = playersPos[i].pt;
-                        var ppb = playersPos[i].pb;
-                        playersPos[i] = res.players[i];
-                        playersPos[i].pl = ppl;
-                        playersPos[i].pr = ppr;
-                        playersPos[i].pt = ppt;
-                        playersPos[i].pb = ppb;
-                    }
-                    // if(playersPos[i].inVehicle != -1){
-                    //     playersPos[i].vehX = res.vehicles[playersPos[i].inVehicle].x;
-                    //     playersPos[i].vehY = res.vehicles[playersPos[i].inVehicle].y;
-                    // }
                 }
+                if(res.type == "attack"){
+                    knockedback(res.knockback);
+                }
+                if(res.type == "respawn"){
+                    respawn();
+                }
+                // if(res.type == "menu"){
+                //     menuActive[0] = true;
+                //     menuActive[1] = res.menuData;
+                // }
             }
-            
-            
-            
-        }
-        if(res.type == "mountVehicle"){
-            for(var i=0;i<vehicles.length;i++){
-                if(vehicles[i].id == res.id){
-                    menuActive[1] = vehicleInterface.controls;
-                    menuActive[1].isVehicle = i;
-                    menuActive[0] = true;
-                    return;
-                }
+            if(res.type == "vehicleChange"){
+                vehicles = res.vehicles;
             }
-        }
-        if(res.type == "teleport"){
-            player.pl = res.pos.pl;
-            player.pr = res.pos.pr;
-            player.pb = res.pos.pb;
-            player.pt = res.pos.pt;
-            gameOffsetY = player.pb-(disp.height/2)+1;
-            gameOffsetX = player.pl-(disp.width/2)+1;
-        }
-        if(res.type == "addProjectile"){
-            projectiles.push(res.projectile);
-        }
-        if(res.type == "delProjectile"){
-            removeProjectile(res.projId);
-        }
-        if(res.type == "block"){
-            if(validBlockClick(res.sBlock.y,res.sBlock.x)){
-                var prevBlock = map[res.sBlock.y][res.sBlock.x];
-                block(res.sBlock.y,res.sBlock.x,res.sBlock.bId);
-                if(activeEnBlock(res.sBlock.bId) != 0 && activeEnBlock(prevBlock[0]) == 1){
-                    energyRemoveT(res.sBlock.x,res.sBlock.y,res.sBlock.bId,prevBlock[2]);
-                }
-                if(activeEnBlock(res.sBlock.bId) != -1){
-                    energyPlace(res.sBlock.x,res.sBlock.y,res.sBlock.bId);
-                }
+            if(res.type == "map"){
+                map = res.map;
+                respawn();
+                loadServerData.mapLoaded = true;
+                loadData.dataLoaded = true;
+                multi = true;
+                multiplayer = true;
+                // ws.send(`joinsession|${sid}`);
             }
-        }
-        if(res.type == "attack"){
-            knockedback(res.knockback);
-        }
-        if(res.type == "respawn"){
-            respawn();
-        }
-        // if(res.type == "menu"){
-        //     menuActive[0] = true;
-        //     menuActive[1] = res.menuData;
-        // }
-    }
-    if(res.type == "vehicleChange"){
-        vehicles = res.vehicles;
-    }
-    if(res.type == "map"){
-        map = res.map;
-        respawn();
-        loadServerData.mapLoaded = true;
-        loadData.dataLoaded = true;
-        multi = true;
-        multiplayer = true;
-        // ws.send(`joinsession|${sid}`);
-    }
-    if(res.type == "worldSpawn"){
-        worldSpawnPoint = res.worldSpawnPoint;
-        player.pl = worldSpawnPoint.x;
-        player.pr = worldSpawnPoint.x+34;
-        player.pb = worldSpawnPoint.y;
-        player.pt = worldSpawnPoint.y+69;
-        gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
-        gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
-        respawn();
-        for(var ij=0;ij<vehicles.length;ij++){
-            vehicles[ij].x = worldSpawnPoint.x+108;
-            vehicles[ij].y = worldSpawnPoint.y
+            if(res.type == "worldSpawn"){
+                worldSpawnPoint = res.worldSpawnPoint;
+                player.pl = worldSpawnPoint.x;
+                player.pr = worldSpawnPoint.x+34;
+                player.pb = worldSpawnPoint.y;
+                player.pt = worldSpawnPoint.y+69;
+                gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
+                gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
+                respawn();
+                for(var ij=0;ij<vehicles.length;ij++){
+                    vehicles[ij].x = worldSpawnPoint.x+108;
+                    vehicles[ij].y = worldSpawnPoint.y
 
+                }
+                loadServerData.spawnPointLoaded = true;
+            }
+            if (res.type == "sid") {
+                sid = res.sid;
+            }
         }
-        loadServerData.spawnPointLoaded = true;
-    }
-    if (res.type == "sid") {
-        sid = res.sid;
-    }
-}
+    });
+};
 
 function dataLoaded(){
     if(!loadData.dataLoaded && (loadData.usingData || gameMode == "Multiplayer")){
-        document.getElementById("loadingScreen").style.display = "none";
+        displayScreen("game");
+        /*document.getElementById("loadingScreen").style.display = "none";
         document.getElementById("mainScreen").style.display = "inline";
-        document.getElementById("menu").style.display = "inline";
+        document.getElementById("menu").style.display = "inline";*/
         clearInterval(load);
         load = null;
         multi = false;
