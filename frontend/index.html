@@ -8,15 +8,15 @@
     <meta name="description" content="2D Free Explore Game. Singeplayer & Multiplayer. PvP, PvE, Build.">
     <meta property="og:url" content="index.html">
     <meta property="og:title" content="tivect">
-    <meta property="og:image" content="icon.png">
-    <meta property="og:image:secure_url" content="icon.png">
+    <meta property="og:image" content="assets/icon.png">
+    <meta property="og:image:secure_url" content="assets/icon.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="500">
     <meta property="og:type" content="website">
     <meta property="og:description" content="2D Free Explore Game. Singelplayer & Multiplayer. PvP, PvE, Build.">
-    <link rel="stylesheet" href="launcher.css">
-    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="icon" type="image/png" href="assets/icon.png">
 </head>
 <body class="noScrollBar">
     <div id="mainMenuScreen">
@@ -28,7 +28,7 @@
             <a href="changelog.html">
                 <button class="menuButton">Changelog</button>
             </a>
-            <a href="vehicleBuilder/vehiclePanel.html">
+            <a href="vehicle_builder/vehicle_panel.html">
                 <button class="menuButton">Vehicle Creator</button>
             </a>
             <h1 id="htd">Download a save file by pressing (L) and (O) at the same time</h1>
@@ -50,39 +50,32 @@
                 <div id="bottomMenu">
                     <div id="startBar">
                         <div id="startButtons">
-                            <button id="gameMode" class="specialButton">Singleplayer</button>
+                            <button id="gameMode" style="width: fit-content;" class="specialButton">
+                                <span id="singleplayer-disp" style="font-weight: bold;">Singleplayer</span>
+                                |
+                                <span id="multiplayer-disp" style="color: var(--textlight)">Multiplayer</span>
+                            </button>
                             <button class="mainButton" id="start">Play</button>
                         </div>
                     </div>
                     <div id="settings">
                         <div id="settingspaddingprovider">
-                            <div class="innersettings">
-                                <div class="settingbox">
-                                    <span>World Width</span>
-                                    <input id="in-worldWidth" type="text" placeholder="World Width">
-                                </div>
-                                <div class="settingbox">
-                                    <span>Seed</span>
-                                    <input id="in-seed" type="text" placeholder="Seed">
-                                </div>
-                                <div class="settingbox">
-                                    <span>
-                                        Worldgen:
-                                        <i id="worldgenMethodText"></i>
-                                    </span>
-                                    <input id="in-worldgenMethod" type="number" placeholder="Method">
-                                </div>
-                            </div>
-                            <div class="innersettingsframe">
+                            <div id="singleplayer-settings" class="innersettingsframe">
                                 <div class="innersettings">
                                     <div class="settingbox">
-                                        <span>Player Shirt Color:</span>
-                                        <div class="colordisp" id="colordisp"></div>
-                                        <input id="in-playerColor" type="number" placeholder="Color">
+                                        <span>World Width</span>
+                                        <input id="in-worldWidth" type="text" placeholder="World Width">
                                     </div>
                                     <div class="settingbox">
-                                        <span>God mode:</span>
-                                        <input id="in-godMode" type="number" placeholder="Method">
+                                        <span>Seed</span>
+                                        <input id="in-seed" type="text" placeholder="Seed">
+                                    </div>
+                                    <div class="settingbox">
+                                        <span>
+                                            Worldgen:
+                                            <i id="worldgenMethodText"></i>
+                                        </span>
+                                        <input id="in-worldgenMethod" type="number" placeholder="Method">
                                     </div>
                                 </div>
                                 <div class="innersettings">
@@ -99,6 +92,25 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="innersettingsframe">
+                                <div class="innersettings">
+                                    <div class="settingbox">
+                                        <span>Player Shirt Color:</span>
+                                        <div class="colordisp" id="colordisp"></div>
+                                        <input id="in-playerColor" type="number" placeholder="Color">
+                                    </div>
+                                    <div class="settingbox">
+                                        <span>God mode:</span>
+                                        <input id="in-godMode" type="number" placeholder="Method">
+                                    </div>
+                                </div>
+                                <div id="multiplayer-settings" class="innersettings" style="width: 400px; display: none;" >
+                                    <div class="settingbox">
+                                        <span>Server URL</span>
+                                        <input id="in-serverUrl" type="text" placeholder="ws://... or wss://..." style="width: 245px;" value="http://localhost:5002">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -109,7 +121,7 @@
     <div id="gameScreen">
         <canvas id="canvas"></canvas>
         <script src="game_constants.js"></script>
-        <script src="launcher.js"></script>
+        <script src="game_launcher.js"></script>
         <script src="game_worldgen.js"></script>
         <script id="gameScript" src="game.js"></script>
         <script src="gamef.js"></script>

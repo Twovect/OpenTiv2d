@@ -12,7 +12,7 @@ function setUpBlocks(){
     for(var j = 0; j < BLOCK_SOURCES.length; j++) {
         textures[j] = document.createElement("IMG");
         if (j != 0) {
-            textures[j].src = '../texture/' + BLOCK_SOURCES[j];
+            textures[j].src = '../assets/textures/' + BLOCK_SOURCES[j];
         };
     };
     render();

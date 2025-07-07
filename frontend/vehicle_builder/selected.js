@@ -10,11 +10,11 @@ var chars = ["plus.png","minus.png"];
 function setUpSelect(){
     for(var j=0;j<2;j++){
         barFrame[j] = document.createElement("IMG");
-        barFrame[j].src = '../texture/' + barFrameSrc[j];
+        barFrame[j].src = '../assets/textures/' + barFrameSrc[j];
     }
     for(var j=0;j<2;j++){
         btns[j] = document.createElement("IMG");
-        btns[j].src = '../texture/chars/' + chars[j];
+        btns[j].src = '../assets/textures/chars/' + chars[j];
     }
     setTimeout(render2,250);
     setTimeout(render2,1000);

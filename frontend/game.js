@@ -866,51 +866,51 @@ function gameSetup() {
         for(var j = 0; j < BLOCK_SOURCES.length; j++) {
             textures[j] = document.createElement("IMG");
             if (j != 0) {
-                textures[j].src = 'texture/' + BLOCK_SOURCES[j];
+                textures[j].src = 'assets/textures/' + BLOCK_SOURCES[j];
             };
         };
         for(var j = 0; j < SWORD_SOURCES.length; j++) {
             wTextures[j] = document.createElement("IMG");
             if (j != 0) {
-                wTextures[j].src = 'texture/' + SWORD_SOURCES[j];
+                wTextures[j].src = 'assets/textures/' + SWORD_SOURCES[j];
             }
         }
         for(var j = 0; j < ENTITY_SOURCES.length; j++) {
             entityImg[j] = document.createElement("IMG");
             if (j != 0) {
-                entityImg[j].src = 'texture/' + ENTITY_SOURCES[j];
+                entityImg[j].src = 'assets/textures/' + ENTITY_SOURCES[j];
             }
         }
         for(var j=0;j<3;j++){
             hitPointImgs[j] = document.createElement("IMG");
-            hitPointImgs[j].src = 'texture/' + HIT_POINT_SOURCES[j];
+            hitPointImgs[j].src = 'assets/textures/' + HIT_POINT_SOURCES[j];
         }
         for(var j=0;j<2;j++){
             barFrame[j] = document.createElement("IMG");
-            barFrame[j].src = 'texture/' + BAR_FRAME_SOURCES[j];
+            barFrame[j].src = 'assets/textures/' + BAR_FRAME_SOURCES[j];
         }
         for(var j=0;j<PLAYER_SOURCES.length;j++){
             playerPic[j] = document.createElement("IMG");
-            playerPic[j].src = "texture/"+PLAYER_SOURCES[j];
+            playerPic[j].src = "assets/textures/"+PLAYER_SOURCES[j];
         }
         for(var j=0;j<ITEM_SOURCES.length;j++){
             iTextures[j] = document.createElement("IMG");
             if (j != 0) {
-                iTextures[j].src = "texture/"+ITEM_SOURCES[j];
+                iTextures[j].src = "assets/textures/"+ITEM_SOURCES[j];
             }
         }
         for(var j=0;j<CHAR_SOURCES.length;j++){
             characters[j] = document.createElement("IMG");
             if (j != 0) {
-                characters[j].src = "texture/chars/"+CHAR_SOURCES[j];
+                characters[j].src = "assets/textures/chars/"+CHAR_SOURCES[j];
             }
         }
         arrowImg = document.createElement("IMG");
-        arrowImg.src = "texture/arrowRight.png";
+        arrowImg.src = "assets/textures/arrowRight.png";
         projectile = document.createElement("IMG");
-        projectile.src = "texture/metalProjectile.png";
+        projectile.src = "assets/textures/metalProjectile.png";
         electricEffect = document.createElement("IMG");
-        electricEffect.src = "texture/electricEffect.png";
+        electricEffect.src = "assets/textures/electricEffect.png";
         // Sync the player with the game options
         player.color = gameOptions.playerColor;
         // Generate world in multiplayer only

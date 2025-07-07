@@ -27,19 +27,21 @@ Ideally, the project should be (may not currently be) structured like:
 ```
 (repo folders and files like docs)
 
-frontend/
+game/
     adminPanel/ (?)
-    vehicleBuilderServer/ (?)
-    vehicleBuilder/
+    vehicle_builder_server/ (?)
+    vehicle_builder/
     shared/
         styles.css
         game_constants.js
         textures/
             ...
-backend/
+multiplayer_server/
     server/
         (?)
 ```
+
+Check `multiplayer_server/README.md` for instructions on starting a multiplayer server.
 
 ## Contribution
 
