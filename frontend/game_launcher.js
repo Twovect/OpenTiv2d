@@ -17,12 +17,24 @@ document.getElementById("importDataButton").addEventListener("click", () => {
 });
 
 document.getElementById("gameMode").onclick = function switchMode() {
-    if(gameMode == "Singleplayer"){
+    if (gameMode == "Singleplayer") {
+        // Set to multiplayer
         gameMode = "Multiplayer";
-        document.getElementById("gameMode").innerHTML = "Multiplayer";
-    } else if(gameMode == "Multiplayer"){
+        document.getElementById("multiplayer-disp").style.fontWeight = "bold";
+        document.getElementById("multiplayer-disp").style.color = "var(--text)";
+        document.getElementById("singleplayer-disp").style.fontWeight = "normal";
+        document.getElementById("singleplayer-disp").style.color = "var(--textlight)";
+        document.getElementById("singleplayer-settings").style.display = "none";
+        document.getElementById("multiplayer-settings").style.display = "block";
+    } else {
+        // Set back to singleplayer
         gameMode = "Singleplayer";
-        document.getElementById("gameMode").innerHTML = "Singleplayer";
+        document.getElementById("singleplayer-disp").style.fontWeight = "bold";
+        document.getElementById("singleplayer-disp").style.color = "var(--text)";
+        document.getElementById("multiplayer-disp").style.fontWeight = "normal";
+        document.getElementById("multiplayer-disp").style.color = "var(--textlight)";
+        document.getElementById("singleplayer-settings").style.display = "block";
+        document.getElementById("multiplayer-settings").style.display = "none";
     }
 }
 
@@ -123,6 +135,14 @@ function activateGameOptionsInputs() {
     }
 }
 activateGameOptionsInputs();
+
+// Handle the multiplayer server URL, which is separate
+let multiplayerServerURL = "ws://localhost:5002";
+const serverURLInput = document.getElementById("in-serverUrl");
+serverURLInput.value = multiplayerServerURL;
+serverURLInput.addEventListener("change", e => {
+    multiplayerServerURL = e.target.value;
+});
 
 // Launch the game with the start button
 document.getElementById("start").addEventListener("click", async () => {
