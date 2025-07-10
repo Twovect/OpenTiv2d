@@ -819,6 +819,10 @@ function norm(v) {
 function cross(a, b) {
     return a[0] * b[1] - b[0] * a[1];
 }
+
+// CONTROL MANAGEMENT
+const ctrlman = new Controls();
+// TODO: deprecate the old `controls` and eventually remove it
 var controls = {
     keys:[[" ",false],["A",false],["D",false],["W",false],["S",false],["F",false],[".",false],["`",false],["1",false],["2",false],["3",false],["4",false],["5",false],["M",false],["L",false],["O",false],["C",false]],
     click:[false,0,0],
@@ -847,6 +851,12 @@ var controls = {
             controls.click[1] = e.clientX;
             controls.click[2] = e.clientY;
         }
+        // Handle clicking on mobile
+        // TODO: move to on tap/on click event
+        // TODO: prevent clicking on blocks behind, support multiple clicking
+        if (isMobile) {
+            clickMobileControls();
+        }
     }
 }
 disp.addEventListener("mousedown", function (e) {/*clickEvent(e)*/;controls.mouse(e)});
@@ -854,7 +864,16 @@ disp.addEventListener("mouseup", function (e) {controls.mouse(e)});
 document.addEventListener("mousemove", function (e){if(controls.click[0]){controls.click[1] = e.clientX;controls.click[2] = e.clientY}})
 window.addEventListener("keydown", controls.control);
 window.addEventListener("keyup", controls.control);
+window.addEventListener("keydown", (e) => {
+    // TODO: handle typing into an interface (is that even still relevant)?
+    ctrlman.pressKey(e.key.toLowerCase());
+});
+window.addEventListener("keyup", (e) => {
+    ctrlman.releaseKey(e.key.toLowerCase());
+});
+
 function isSolid(val) {
+    // TODO: refactor into constants!
     if (val != 0 && val != 9 && val != 10 && val != 11 && val != 13 && val != 14 && val != 17 && val != 29 && val != 36) {
         return true;
     }
@@ -925,7 +944,7 @@ function gameSetup() {
                 map = processHeightMap(heights);
             } else {
                 // Legacy
-                legacyWorldGeneration();
+                map = legacyWorldGeneration();
             }
             const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
             var xSpawnPoint = Math.round(seedPercent * ((map[0].length-1) - 0) + 0);
@@ -965,232 +984,7 @@ function gameSetup() {
         respawn();
     }
 }
-function processHeightMap(hMap){
-    var nMap = [];
-    var width = hMap.length;
-    var height = DEFAULT_WORLDGEN_HEIGHT;
-    for(var i=0;i<height;i++){
-        nMap.push([])
-    }
-    for(var i=0;i<width;i++){
-        var aVal = height-(hMap[i]+height/2)
-        for(var j=0;j<height;j++){
-            if (j<aVal && j < DEFAULT_WATER_LEVEL) {
-                nMap[j].push(DBLOCKS[0]);
-            }
-            else if (j<aVal && j >= DEFAULT_WATER_LEVEL) {
-                nMap[j].push(DBLOCKS[13]); // Water
-            }
-            else if (j == aVal) {
-                nMap[j].push(DBLOCKS[1]);
-            }
-            else if (j > aVal && j < aVal+5) {
-                nMap[j].push(DBLOCKS[4]);
-            }
-            else if (j >= aVal+5) {
-                nMap[j].push(DBLOCKS[5]);
-            }
-        }
-        // Fill in bodies of water also
-    }
-    return nMap;
-}
-function legacyWorldGeneration(){
-    // TODO: allow legacy worldgen to work with seeds
-    var wMap = [];
-    var biomes = [1,0,1,0,1];
-    var maxBiomes = 2;
-    var yWaterLevel = 35;
-    var curY = 80 - yWaterLevel - 2;
-    var mainY = 35;
-    // for(var i=0;i<15;i++){
-    //     biomes.push(Math.floor(Math.random() * (maxBiomes - 0 + 1) + 0));
-    // }
-    for(var i=0;i<80;i++){
-        wMap.push([])
-    }
-    for(var i=0;i<biomes.length;i++){
-        var fallFor = 50;
-        var flatFor = 50;
-        var riseFor = 50;
-        var loopFor = 100;
-        var rise = false;
-        var fall = false;
-        var flat = false;
-        var biome = biomes[i];
-        if(biome == 0){
-            mainY = 80-11;
-            if(curY <= 80-11){
-                fallFor = (80-11) - curY;
-                fall = true;
-            } else {
-                flat = true;
-            }
-            // riseFor = 0;
-            // flatFor = Math.floor(Math.random() * (12 - 6 + 1) + 6);
-            // loopFor = fallFor+flatFor+riseFor;
-        } else if(biome == 1){
-            mainY = 35;
-            if(curY > mainY-2){
-                riseFor = curY - (mainY-2);
-                rise = true;
-            } else if (curY < mainY+2){
-                fallFor = (mainY+2) - curY;
-                fall = true;
-            } else {
-                flat = true;
-            }
-            // flatFor = Math.floor(Math.random() * (15 - 6 + 1) + 6);
-            // loopFor = fallFor+flatFor+riseFor;
-        } else if(biome == 2){
-            mainY = Math.floor(Math.random() * (16 - 7 + 1) + 7);
-            if(curY > mainY){
-                rise = true;
-                riseFor = curY - mainY;
-            }
-            // fallFor = 80 - yWaterLevel + mainY;
-            // loopFor = fallFor+riseFor+flatFor;
-        }
-        for(var l=0;l<loopFor;l++){
-        var minLength = 0;
-        var maxLength = 0;
-        if(curY == mainY && biome == 1){
-            fall = false;
-            rise = false;
-            flat = true;
-        } else if(curY <= mainY){
-            fall = true;
-            rise = false;
-            flat = false;
-        }
-        if(fall){
-            var fallY = Math.floor(Math.random() * (1 - 1 + 1) + 1);
-            if(biome == 0){
-                if((curY+fallY)<=80-11){
-                    curY += fallY;
-                    minLength = 1;
-                    maxLength = 4;
-                } else if ((curY+fallY)>=80-11){
-                    mainY = 80-11;
-                    fall = false;
-                    flat = true;
-                }
-            } else if(biome == 2){
-                minLength = 0;
-                maxLength = 2;
-            }
-        } else if(flat){
-            var plainY = Math.floor(Math.random() * (1 - -1 + 1) + -1);
-            if((curY+plainY) > mainY-2 && (curY+plainY) < mainY+2){
-                curY += plainY;
-            }
-            
-            minLength = 6;
-            maxLength = 9;
-        } else if(rise){
-            var riseY = Math.floor(Math.random() * (-1 - -1 + 1) + -1);
-            // if(curY+riseY>yWaterLevel){ //&& curY+riseY<yWaterLevel-3){
-            //     curY += riseY;
-            // }
 
-            curY += riseY;
-            if(biome == 2 && curY <= yWaterLevel){
-                minLength = 0;
-                maxLength = 2;
-            } else {
-                minLength = 1;
-                maxLength = 4;
-            }
-            // if(biome == 2 && curY < yWaterLevel){
-            //     minLength = 1;
-            //     maxLength = 4;
-            // } else if(biome == 2 && curY >= yWaterLevel){
-            //     minLength = 0;
-            //     maxLength = 3;
-            // }
-        }
-            var distance = Math.floor(Math.random() * (maxLength - minLength + 1) + minLength);
-            if(biome == 2 && Math.floor(Math.random() * (1 - 0 + 1) + 0) == 0){
-                if(Math.floor(Math.random() * (1 - 0 + 1) + 0) == 1){
-                    distance = 0;
-                }
-            }
-            // var riseYy = Math.floor(Math.random()* (1 - 0 + 1) + 0);
-            // if(riseYy == 0){
-            //     riseY = 0
-            // }
-            // curY += Math.floor(Math.random() * (1 - 0 + 1) + 0);
-            //Math.floor(Math.random() * (1 - 0 + 1) + 0) FOR OCEAN GENERATION
-            //Math.floor(Math.random() * (1 - -1 + 1) + -1) FOR PLAINS GENERATION
-            //Math.floor(Math.random() * (0 - -1 + 1) + -1) FOR MOUNTAINS GENERATION
-                for(var ji=0;ji<distance;ji++){
-                    for(var j=0;j<wMap.length;j++){
-                        if(j<curY){
-                            wMap[j].push(DBLOCKS[0]);
-                        } else if (j == curY){
-                            wMap[j].push(DBLOCKS[1]);
-                        } else if(j > curY && j < curY+5){
-                            wMap[j].push(DBLOCKS[4]);
-                        } else if(j >= curY+5){
-                            wMap[j].push(DBLOCKS[5]);
-                        }
-                    }
-                }
-            }
-    }
-    for(var i=(80 - yWaterLevel);i<wMap.length;i++){
-        for(var l=0;l<wMap[i].length;l++){
-            if(wMap[i][l][0] == 0){
-                // wMap[i][l] = block[13];
-                // block(i,l,13);
-                wMap[i][l] = DBLOCKS[13]
-            } else if(wMap[i][l][0] == 1){
-                wMap[i][l] = DBLOCKS[20]
-                wMap[i+1][l] = DBLOCKS[20]
-                wMap[i-1][l] = DBLOCKS[20]
-                
-                // block(i,l,20);
-                // block(i+1,l,20);
-                // block(i-1,l,20);
-            }
-        }
-    }
-    // console.log(wMap)
-
-
-    //FIX THIS -- ITS WORLDSPAWN GENERATION
-    var biomeLength = Math.floor((wMap[0].length-1)/biomes.length);
-    var biomeSpawn = Math.random() * (biomes.length - 1) + 1;
-    var xSpawnMax = biomeLength * biomeSpawn;
-    var xSpawnMin = biomeLength * (biomeSpawn-1);
-    var xSpawnPoint = Math.round(Math.random() * ((xSpawnMax-1) - xSpawnMin) + xSpawnMin);
-    var ySpawnPoint = 0;
-    for(var i=wMap.length-1;i>0;i--){
-        if(wMap[i][xSpawnPoint][0] != 0 && wMap[i-1][xSpawnPoint][0] == 0 && wMap[i-2][xSpawnPoint][0] == 0){
-            ySpawnPoint = wMap.length - i;
-            break;
-        }
-    }
-    worldSpawnPoint.x = (xSpawnPoint*36)+1;
-    worldSpawnPoint.y = (ySpawnPoint*36)+1;
-    player.pl = worldSpawnPoint.x;
-    player.pr = worldSpawnPoint.x+34;
-    player.pb = worldSpawnPoint.y;
-    player.pt = worldSpawnPoint.y+69;
-    gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
-    gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
-    for(var i=0;i<entities.length;i++){
-        entities[i].pl = worldSpawnPoint.x;
-        entities[i].pr = worldSpawnPoint.x+34;
-        entities[i].pb = worldSpawnPoint.y;
-        entities[i].pt = worldSpawnPoint.y+69;
-    }
-    for(var i=0;i<vehicles.length;i++){
-        vehicles[i].x = worldSpawnPoint.x+220;
-        vehicles[i].y = worldSpawnPoint.y;
-    }
-    map = wMap;
-}
 function drawSquare(x, y, val,clickAction) {
     if (val != 0) {
         if(clickAction == 2){
@@ -1629,6 +1423,7 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
             if (
                 xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
                 && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
+                && controls.click[0]
             ) {
                 clickedButtonNames.push(buttonName);
             } else {
@@ -1641,6 +1436,7 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
             if (
                 xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
                 && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
+                && controls.click[0]
             ) {
                 clickedButtonNames.push(buttonName);
             } else {
@@ -1659,7 +1455,6 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
         }
     }
     for (const buttonName of notClickedButtonNames) {
-        console.log("Unclicked " + buttonName);
         if (MOBILE_CONTROL_MAP[buttonName]) {
             controls.control({
                 type: "keyup",
@@ -2686,7 +2481,7 @@ function isTool(){
 function getCurrent(){
     return current;
 }
-function useControls(){
+function useControls() {
     var speed = 1.4;
     // var gravity = (9.8*36)/((60/1)*(60/1))*(60/60);
     // var jump = 7.4*(60/60);
