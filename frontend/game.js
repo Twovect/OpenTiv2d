@@ -208,49 +208,18 @@ function knockedback(intensity){
     
 }
 function changeClick() {
-    if (controls.keys[7][1]) {
-        controls.keys[7][1] = false;
+    if (ctrlman.isDownNoHold("menu")) {
         clickAction = null;
     };
-    if (controls.keys[8][1]) {
-        controls.keys[8][1] = false;
-        if(menuActive[0]){
-            menuPress(1);
-        } else {
-            player.selected = 0;
-        }
-    };
-    if (controls.keys[9][1]) {
-        controls.keys[9][1] = false;
-        if(menuActive[0]){
-            menuPress(2);
-        } else {
-            player.selected = 1;
-        }
-    };
-    if(controls.keys[10][1]) {
-        controls.keys[10][1] = false;
-        if(menuActive[0]){
-            menuPress(3);
-        } else {
-            player.selected = 2;
-        }
-    }
-    if(controls.keys[11][1]) {
-        controls.keys[11][1] = false;
-        if(menuActive[0]){
-            menuPress(4);
-        } else {
-            player.selected = 3;
-        }
-    }
-    if(controls.keys[12][1]) {
-        controls.keys[12][1] = false;
-        if(menuActive[0]){
-            menuPress(5);
-        } else {
-            player.selected = 4;
-        }
+    // Inventory slots
+    for (let slot = 1; slot <= 5; ++slot) {
+        if (ctrlman.isDownNoHold("inv_" + slot)) {
+            if(menuActive[0]){
+                menuPress(slot);
+            } else {
+                player.selected = slot - 1;
+            }
+        };
     }
 };
 function min(a, b) { return a < b ? a : b; }
@@ -545,17 +514,17 @@ function dropItem(){
     var y1 = (player.pt + player.pb-18)/2;
     var yVel = 0;
     var xVel = 0;
-    if(!controls.keys[1][1] || !controls.keys[2][1]){
-        if(controls.keys[1][1]){
+    if (!ctrlman.isDown("move_left") || !ctrlman.isDown("move_right")) {
+        if (ctrlman.isDown("move_left")) {
             yVel = 0.1;
             xVel = -0.3;
-            if(controls.keys[3][1]){
+            if (ctrlman.isDown("sprint")) {
                 xVel -= 0.18;
             }
-        } else if(controls.keys[2][1]){
+        } else if (ctrlman.isDown("move_right")) {
             yVel = 0.1;
             xVel = 0.3;
-            if(controls.keys[3][1]){
+            if (ctrlman.isDown("sprint")) {
                 xVel += 0.18;
             }
         }
@@ -821,49 +790,29 @@ function cross(a, b) {
 }
 
 // CONTROL MANAGEMENT
-const ctrlman = new Controls();
-// TODO: deprecate the old `controls` and eventually remove it
-var controls = {
-    keys:[[" ",false],["A",false],["D",false],["W",false],["S",false],["F",false],[".",false],["`",false],["1",false],["2",false],["3",false],["4",false],["5",false],["M",false],["L",false],["O",false],["C",false]],
-    click:[false,0,0],
-    control:function(e){
-        const keyDown = (e.type == "keydown");
-        const keyUp = (e.type == "keyup");
-        if(menuActive[0] && menuActive[1].type == "interface"){
-            if(keyDown){
-                interfaceType(e.key.toUpperCase());
-            }
-        }
-        for(var i=0;i<controls.keys.length;i++){
-            if(controls.keys[i][0] == e.key.toUpperCase()){
-                if(controls.keys[i][0] == -1){
-                    controls.keys[i][1] = keyUp;
-                } else {
-                    controls.keys[i][1] = keyDown;
-                }
-            }
-        }
-    },
-    mouse:function(e){
-        const mouseDown = (e.type == "mousedown");
-        controls.click[0] = mouseDown;
-        if(mouseDown){
-            controls.click[1] = e.clientX;
-            controls.click[2] = e.clientY;
-        }
-        // Handle clicking on mobile
-        // TODO: move to on tap/on click event
-        // TODO: prevent clicking on blocks behind, support multiple clicking
-        if (isMobile) {
-            clickMobileControls();
-        }
+const ctrlman = new ControlsManager();
+
+disp.addEventListener("mousedown", function (e) {
+    ctrlman.pressMouse();
+    // Handle clicking on mobile
+    // TODO: move to on tap/on click event
+    // TODO: prevent clicking on blocks behind, support multiple clicking
+    if (isMobile) {
+        clickMobileControls();
     }
-}
-disp.addEventListener("mousedown", function (e) {/*clickEvent(e)*/;controls.mouse(e)});
-disp.addEventListener("mouseup", function (e) {controls.mouse(e)});
-document.addEventListener("mousemove", function (e){if(controls.click[0]){controls.click[1] = e.clientX;controls.click[2] = e.clientY}})
-window.addEventListener("keydown", controls.control);
-window.addEventListener("keyup", controls.control);
+});
+disp.addEventListener("mouseup", function (e) {
+    ctrlman.releaseMouse();
+    // Handle clicking on mobile
+    // TODO: move to on tap/on click event
+    // TODO: prevent clicking on blocks behind, support multiple clicking
+    if (isMobile) {
+        clickMobileControls();
+    }
+});
+document.addEventListener("mousemove", function (e){
+    ctrlman.updateMouseLocation(e.clientX, e.clientY);
+})
 window.addEventListener("keydown", (e) => {
     // TODO: handle typing into an interface (is that even still relevant)?
     ctrlman.pressKey(e.key.toLowerCase());
@@ -1389,13 +1338,15 @@ function getMobileDimensions() {
         }
     };
 }
+
+/** Maps mobile buttons to actions in the key controls manager */
 const MOBILE_CONTROL_MAP = {
-    close: "`", // controls.keys[7], which equals "`"
-    navL: "A",
-    navR: "D",
-    navU: "W",
-    navD: "S",
-    jump: " "
+    close: "menu",
+    navL: "move_left",
+    navR: "move_right",
+    navU: "sprint",
+    navD: "slow",
+    jump: "jump"
 };
 
 function drawMobileControls(isMenuActive) {
@@ -1423,7 +1374,7 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
             if (
                 xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
                 && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
-                && controls.click[0]
+                && ctrlman.isMouseDown()
             ) {
                 clickedButtonNames.push(buttonName);
             } else {
@@ -1436,7 +1387,7 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
             if (
                 xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
                 && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
-                && controls.click[0]
+                && ctrlman.isMouseDown()
             ) {
                 clickedButtonNames.push(buttonName);
             } else {
@@ -1448,18 +1399,12 @@ function clickMobileControls(xPos, yPos, isMenuActive) {
     for (const buttonName of clickedButtonNames) {
         console.log("Clicked " + buttonName);
         if (MOBILE_CONTROL_MAP[buttonName]) {
-            controls.control({
-                type: "keydown",
-                key: MOBILE_CONTROL_MAP[buttonName]
-            });
+            ctrlman.pressAction(MOBILE_CONTROL_MAP[buttonName]);
         }
     }
     for (const buttonName of notClickedButtonNames) {
         if (MOBILE_CONTROL_MAP[buttonName]) {
-            controls.control({
-                type: "keyup",
-                key: MOBILE_CONTROL_MAP[buttonName]
-            });
+            ctrlman.releaseAction(MOBILE_CONTROL_MAP[buttonName]);
         }
     }
 }
@@ -2511,7 +2456,7 @@ function useControls() {
     // var scrollBackgroundX = false;
     // var scrollBackgroundY = false;
     if(!menuActive[0]){
-        if (controls.keys[3][1]) {
+        if (ctrlman.isDown("sprint")) {
             if (gameOptions.godMode == 1) {
                 speed *= 3.3;
             } else {
@@ -2521,35 +2466,33 @@ function useControls() {
                 jump *= 1.4;
             };
         };
-        if (controls.keys[4][1]) {
+        if (ctrlman.isDown("slow")) {
             speed /= 2;
             if (player.inWater) {
                 gravity *= 2.6;
             };
         };
-        if (controls.keys[0][1] && (player.jumping == false || gameOptions.godMode == 1)) {
+        if (ctrlman.isDown("jump") && (player.jumping == false || gameOptions.godMode == 1)) {
             // Jump
             player.velY += jump;
             player.jumping = true;
             player.velY = Math.min(player.velY, 20);
         };
-        if (controls.keys[1][1]) {
+        if (ctrlman.isDown("move_left")) {
             player.velX -= 0.5;
         };
-        if (controls.keys[2][1]) {
+        if (ctrlman.isDown("move_right")) {
             player.velX += 0.5;
         };
-        if (controls.keys[5][1]){
-            controls.keys[5][1] = false;
+        if (ctrlman.isDownNoHold("drop")){
             dropItem();
         }
-        if (controls.keys[6][1]) {
-            controls.keys[6][1] = false;
+        if (ctrlman.isDownNoHold("respawn")) {
             willRespawn = true;
         };
-        if (controls.keys[14][1] && controls.keys[15][1]) {
-            controls.keys[14][1] = false;
-            controls.keys[15][1] = false;
+        if (ctrlman.isDown("save1") && ctrlman.isDown("save2")) {
+            ctrlman.releaseAction("save1");
+            ctrlman.releaseAction("save2");
             saveGame();
         }
     } else if(menuActive[0] && menuActive[1].purpose == "vehicle"){
@@ -2564,56 +2507,47 @@ function useControls() {
                 cruiseC = "ON";
             }
             menuActive[1].rows[4][1][1] = cruiseC;
-            if (controls.keys[3][1]) {
+            if (ctrlman.isDown("sprint")) {
                 vehicles[menuActive[1].isVehicle].movingUp = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingUp = false;
             }
-            if (controls.keys[4][1]) {
+            if (ctrlman.isDown("slow")) {
                 vehicles[menuActive[1].isVehicle].movingDown = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingDown = false;
             }
-            if (controls.keys[1][1]) {
+            if (ctrlman.isDown("move_left")) {
                 vehicles[menuActive[1].isVehicle].movingLeft = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingLeft = false;
             }
-            if (controls.keys[2][1]) {
+            if (ctrlman.isDown("move_right")) {
                 vehicles[menuActive[1].isVehicle].movingRight = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingRight = false;
             }
-            // console.log(controls.keys[16][1]);
-            if(controls.keys[16][1]){
-                controls.keys[16][1] = false;
-                if(vehicles[menuActive[1].isVehicle].cruise){
+            if (ctrlman.isDownNoHold("cruise")) {
+                if (vehicles[menuActive[1].isVehicle].cruise) {
                     vehicles[menuActive[1].isVehicle].cruise = false;
                 } else {
                     vehicles[menuActive[1].isVehicle].cruise = true;
                 }
             }
         }
-    } else if(menuActive[0] && menuActive[1].type == "gui"){
-        if (controls.keys[3][1]) {
+    } else if (menuActive[0] && menuActive[1].type == "gui") {
+        // Documentation: unknown what "gui" actually is (is it like the vehicle builder?)
+        if (ctrlman.isDownNoHold("sprint")) {
             menuActive[1].offsetY += 1;
-            controls.keys[3][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingUp = true;
         }
-        if (controls.keys[4][1]) {
+        if (ctrlman.isDownNoHold("slow")) {
             menuActive[1].offsetY -= 1;
-            controls.keys[4][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingDown = true;
         }
-        if (controls.keys[1][1]) {
+        if (ctrlman.isDownNoHold("move_left")) {
             menuActive[1].offsetX += 1;
-            controls.keys[1][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingLeft = true;
         }
-        if (controls.keys[2][1]) {
+        if (ctrlman.isDownNoHold("move_right")) {
             menuActive[1].offsetX -= 1;
-            controls.keys[2][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingRight = true;
         }
     }
 
@@ -2625,8 +2559,7 @@ function useControls() {
     //     }
     // }
 
-    if (controls.keys[7][1]) {
-        controls.keys[7][1] = false;
+    if (ctrlman.isDownNoHold("menu")) {
         if(menuActive[0]){
             if(menuActive[1].purpose == "vehicle" && player.inVehicle != -1  && !vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingUp = false;
@@ -2668,20 +2601,22 @@ function useControls() {
         }
     }
     changeClick();
-    if(controls.click[0] && canHoldClick){
+
+    if (ctrlman.isMouseDown() && canHoldClick) {
         // Currently clicking
         canHoldClick = false;
         setTimeout(function(){
+            // TODO: refactor this, it's hard to read
             canHoldClick = true;
         },300);
         var placeBlock = true;
         var rect = disp.getBoundingClientRect();
-        var xPos = controls.click[1]-rect.left+((gameOffsetX-mapCoord.x)*renderSize);
-        var yPos = controls.click[2]-rect.top-((gameOffsetY-mapCoord.y)*renderSize);
+        var xPos = ctrlman.lastClickPositionX() -rect.left+((gameOffsetX-mapCoord.x)*renderSize);
+        var yPos = ctrlman.lastClickPositionY()-rect.top-((gameOffsetY-mapCoord.y)*renderSize);
         var blockX = Math.floor(xPos / (36*renderSize));
         var blockY = Math.floor((yPos - (disp.height*renderSize)) / (36*renderSize)) + map.length;
-        var xPo = controls.click[1]-rect.left;
-        var yPo = disp.height - controls.click[2];
+        var xPo = ctrlman.lastClickPositionX() -rect.left;
+        var yPo = disp.height - ctrlman.lastClickPositionY();
         if(menuActive[0]){
             // Handle clicking in menu
             menuActive[1].mouseX = xPo;
@@ -2728,8 +2663,8 @@ function useControls() {
                 }
             }
             for(var i=0;i<vehicles.length;i++){
-                var vehXpos = controls.click[1]-rect.left+(gameOffsetX-vehicles[i].x)*renderSize;
-                var vehYpos = controls.click[2]-rect.top-(gameOffsetY-vehicles[i].y)*renderSize;
+                var vehXpos = ctrlman.lastClickPositionX() -rect.left+(gameOffsetX-vehicles[i].x)*renderSize;
+                var vehYpos = ctrlman.lastClickPositionY()-rect.top-(gameOffsetY-vehicles[i].y)*renderSize;
                 var vehBlockX = Math.floor(vehXpos / (36*renderSize));
                 var vehBlockY = Math.floor((vehYpos - (disp.height*renderSize)) / (36*renderSize)) + vehicles[i].map.length;
                 if(validVehicleBlock(vehBlockY,vehBlockX,i)){
