@@ -797,18 +797,18 @@ disp.addEventListener("mousedown", function (e) {
     // Handle clicking on mobile
     // TODO: move to on tap/on click event
     // TODO: prevent clicking on blocks behind, support multiple clicking
-    if (isMobile) {
+    /*if (isMobile) {
         clickMobileControls();
-    }
+    }*/
 });
 disp.addEventListener("mouseup", function (e) {
     ctrlman.releaseMouse();
     // Handle clicking on mobile
     // TODO: move to on tap/on click event
     // TODO: prevent clicking on blocks behind, support multiple clicking
-    if (isMobile) {
+    /*if (isMobile) {
         clickMobileControls();
-    }
+    }*/
 });
 document.addEventListener("mousemove", function (e){
     ctrlman.updateMouseLocation(e.clientX, e.clientY);
@@ -819,6 +819,39 @@ window.addEventListener("keydown", (e) => {
 });
 window.addEventListener("keyup", (e) => {
     ctrlman.releaseKey(e.key.toLowerCase());
+});
+// For mobile
+disp.addEventListener("touchstart", (e) => {
+    console.log("Touch start")
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+        // TODO: replace with actual touching
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+    }
+    clickMobileControls();
+});
+disp.addEventListener("touchend", (e) => {
+    console.log("Touch end")
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    clickMobileControls();
+});
+disp.addEventListener("touchcancel", (e) => {
+    console.log("Touch cancel")
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    clickMobileControls();
+});
+disp.addEventListener("touchmove", (e) => {
+    console.log("Touch move")
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+        // TODO: replace with actual touching
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+    }
+    clickMobileControls();
 });
 
 function isSolid(val) {
@@ -1323,8 +1356,12 @@ function getMobileDimensions() {
                 x: navX + BUTTON_CONTAINER_WIDTH * 2,
                 y: navY
             },
-            navU: {
-                x: navX + BUTTON_CONTAINER_WIDTH,
+            navRU: {
+                x: navX + BUTTON_CONTAINER_WIDTH * 1.5,
+                y: navY + BUTTON_CONTAINER_WIDTH
+            },
+            navLU: {
+                x: navX + BUTTON_CONTAINER_WIDTH / 2,
                 y: navY + BUTTON_CONTAINER_WIDTH
             },
             navD: {
@@ -1341,12 +1378,13 @@ function getMobileDimensions() {
 
 /** Maps mobile buttons to actions in the key controls manager */
 const MOBILE_CONTROL_MAP = {
-    close: "menu",
-    navL: "move_left",
-    navR: "move_right",
-    navU: "sprint",
-    navD: "slow",
-    jump: "jump"
+    close: ["menu"],
+    navL: ["move_left"],
+    navR: ["move_right"],
+    navRU: ["move_right", "sprint"],
+    navLU: ["move_left", "sprint"],
+    navD: ["slow"],
+    jump: ["jump"]
 };
 
 function drawMobileControls(isMenuActive) {
@@ -1363,48 +1401,48 @@ function drawMobileControls(isMenuActive) {
     }
 }
 
-function clickMobileControls(xPos, yPos, isMenuActive) {
+function clickMobileControls() {
+    // Obtain the cursor location
+    // TODO: remove duplicate code
+    var rect = disp.getBoundingClientRect();
+    const xPos = ctrlman.lastClickPositionX() - rect.left;
+    const yPos = ctrlman.lastClickPositionY();
+    const isMenuActive = menuActive[0];
     console.log("Checking clicked mobile controls: " + xPos + ", " + yPos);
+    // Check the buttons
     const mobileDim = getMobileDimensions();
     const clickedButtonNames = [];
     const notClickedButtonNames = [];
-    if (isMenuActive) {
-        for (const [buttonName, loc] of Object.entries(mobileDim.inMenu)) {
-            // Check if mouse is within dimensions
-            if (
-                xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
-                && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
-                && ctrlman.isMouseDown()
-            ) {
-                clickedButtonNames.push(buttonName);
-            } else {
-                notClickedButtonNames.push(buttonName);
-            }
-        }
-    } else {
-        for (const [buttonName, loc] of Object.entries(mobileDim.inNormal)) {
-            // Check if mouse is within dimensions
-            if (
-                xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
-                && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
-                && ctrlman.isMouseDown()
-            ) {
-                clickedButtonNames.push(buttonName);
-            } else {
-                notClickedButtonNames.push(buttonName);
-            }
+    const sourceButtonsFrom = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
+    for (const [buttonName, loc] of Object.entries(sourceButtonsFrom)) {
+        // Check if mouse is within dimensions
+        if (
+            xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
+            && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
+            && ctrlman.isMouseDown()
+        ) {
+            clickedButtonNames.push(buttonName);
+        } else {
+            notClickedButtonNames.push(buttonName);
         }
     }
     // Deal with the buttons clicked
-    for (const buttonName of clickedButtonNames) {
-        console.log("Clicked " + buttonName);
-        if (MOBILE_CONTROL_MAP[buttonName]) {
-            ctrlman.pressAction(MOBILE_CONTROL_MAP[buttonName]);
-        }
-    }
     for (const buttonName of notClickedButtonNames) {
         if (MOBILE_CONTROL_MAP[buttonName]) {
-            ctrlman.releaseAction(MOBILE_CONTROL_MAP[buttonName]);
+            for (const action of MOBILE_CONTROL_MAP[buttonName]) {
+                console.log("Will release: " + action);
+                ctrlman.releaseAction(action);
+            }
+        }
+    }
+    for (const buttonName of clickedButtonNames) {
+        console.log("Clicked " + buttonName);
+        if (buttonName in MOBILE_CONTROL_MAP) {
+            console.log("Iterating: " + MOBILE_CONTROL_MAP[buttonName]);
+            for (const action of MOBILE_CONTROL_MAP[buttonName]) {
+                console.log("Will press: "  + action);
+                ctrlman.pressAction(action);
+            }
         }
     }
 }
@@ -2622,13 +2660,13 @@ function useControls() {
             menuActive[1].mouseX = xPo;
             menuActive[1].mouseY = yPo;
             if (isMobile) {
-                clickMobileControls(xPo, disp.height - yPo, true);
+                clickMobileControls();
             }
             clickBtn();
         } else {
             // Handle clicking outside of a menu
             if (isMobile) {
-                clickMobileControls(xPo, disp.height - yPo, false);
+                clickMobileControls();
             }
             for(var i=0;i<entities.length;i++){
                 if(entities[i].type == 2 && buttonClick(xPo,yPo,entities[i].pt-gameOffsetY,entities[i].pb-gameOffsetY,entities[i].pr-gameOffsetX,entities[i].pl-gameOffsetX)){

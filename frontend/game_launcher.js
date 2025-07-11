@@ -145,7 +145,7 @@ serverURLInput.addEventListener("change", e => {
 });
 
 // CHECK FOR MOBILE
-let isMobile = false;
+let isMobile = true;
 
 // Debugging
 const debugCheck = document.getElementById("in-debugcheck");

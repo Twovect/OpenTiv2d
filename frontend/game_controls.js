@@ -21,7 +21,8 @@ class ControlsManager {
       "o": "save2", // 15
       "c": "cruise", // 16
     };
-    this.clickLocations = [];
+    this.clickX = -1;
+    this.clickY = -1;
     this.mousePressed = false;
   }
 
@@ -74,16 +75,12 @@ class ControlsManager {
 
   /** Return the x element of the last click position */
   lastClickPositionX() {
-    if (this.clickLocations.length > 0) {
-      return this.clickLocations[this.clickLocations.length - 1][0];
-    }
+    return this.clickX;
   }
 
   /** Return the y element of the last click position */
   lastClickPositionY() {
-    if (this.clickLocations.length > 0) {
-      return this.clickLocations[this.clickLocations.length - 1][1];
-    }
+    return this.clickY;
   }
 
   /** Mouse down */
@@ -98,7 +95,7 @@ class ControlsManager {
 
   /** Update mouse location */
   updateMouseLocation(x, y) {
-    this.clickLocations = [];
-    this.clickLocations.push([x, y]);
+    this.clickX = x;
+    this.clickY = y;
   }
 }
