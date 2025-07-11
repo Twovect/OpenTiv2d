@@ -797,18 +797,18 @@ disp.addEventListener("mousedown", function (e) {
     // Handle clicking on mobile
     // TODO: move to on tap/on click event
     // TODO: prevent clicking on blocks behind, support multiple clicking
-    /*if (isMobile) {
-        clickMobileControls();
-    }*/
+    if (isMobile) {
+        checkMobileControls();
+    }
 });
 disp.addEventListener("mouseup", function (e) {
     ctrlman.releaseMouse();
     // Handle clicking on mobile
     // TODO: move to on tap/on click event
     // TODO: prevent clicking on blocks behind, support multiple clicking
-    /*if (isMobile) {
-        clickMobileControls();
-    }*/
+    if (isMobile) {
+        checkMobileControls();
+    }
 });
 document.addEventListener("mousemove", function (e){
     ctrlman.updateMouseLocation(e.clientX, e.clientY);
@@ -822,36 +822,50 @@ window.addEventListener("keyup", (e) => {
 });
 // For mobile
 disp.addEventListener("touchstart", (e) => {
-    console.log("Touch start")
     e.preventDefault();
     for (const touch of e.changedTouches) {
-        // TODO: replace with actual touching
+        // 1. Set the mouse location
         ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
         ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.setTouch(touch.pageX, touch.pageY, touch.identifier);
     }
-    clickMobileControls();
-});
-disp.addEventListener("touchend", (e) => {
-    console.log("Touch end")
-    e.preventDefault();
-    ctrlman.releaseMouse();
-    clickMobileControls();
-});
-disp.addEventListener("touchcancel", (e) => {
-    console.log("Touch cancel")
-    e.preventDefault();
-    ctrlman.releaseMouse();
-    clickMobileControls();
+    checkMobileControls();
 });
 disp.addEventListener("touchmove", (e) => {
-    console.log("Touch move")
     e.preventDefault();
     for (const touch of e.changedTouches) {
-        // TODO: replace with actual touching
+        // 1. Set the mouse location
         ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
         ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.setTouch(touch.pageX, touch.pageY, touch.identifier);
     }
-    clickMobileControls();
+    checkMobileControls();
+});
+disp.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.removeTouch(touch.identifier);
+    }
+    checkMobileControls();
+});
+disp.addEventListener("touchcancel", (e) => {
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.removeTouch(touch.identifier);
+    }
+    checkMobileControls();
 });
 
 function isSolid(val) {
@@ -1358,15 +1372,15 @@ function getMobileDimensions() {
             },
             navRU: {
                 x: navX + BUTTON_CONTAINER_WIDTH * 1.5,
-                y: navY + BUTTON_CONTAINER_WIDTH
+                y: navY - BUTTON_CONTAINER_WIDTH
             },
             navLU: {
                 x: navX + BUTTON_CONTAINER_WIDTH / 2,
-                y: navY + BUTTON_CONTAINER_WIDTH
+                y: navY - BUTTON_CONTAINER_WIDTH
             },
             navD: {
                 x: navX + BUTTON_CONTAINER_WIDTH,
-                y: navY - BUTTON_CONTAINER_WIDTH
+                y: navY + BUTTON_CONTAINER_WIDTH
             },
             jump: {
                 x: disp.width - BUTTON_WIDTH * 2,
@@ -1401,11 +1415,13 @@ function drawMobileControls(isMenuActive) {
     }
 }
 
-function clickMobileControls() {
+let clickingMobileControls = false;
+
+function checkMobileControls() {
     // Obtain the cursor location
     // TODO: remove duplicate code
     var rect = disp.getBoundingClientRect();
-    const xPos = ctrlman.lastClickPositionX() - rect.left;
+    const xPos = ctrlman.lastClickPositionX();
     const yPos = ctrlman.lastClickPositionY();
     const isMenuActive = menuActive[0];
     console.log("Checking clicked mobile controls: " + xPos + ", " + yPos);
@@ -1416,11 +1432,12 @@ function clickMobileControls() {
     const sourceButtonsFrom = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
     for (const [buttonName, loc] of Object.entries(sourceButtonsFrom)) {
         // Check if mouse is within dimensions
-        if (
+        /*if (
             xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
             && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
             && ctrlman.isMouseDown()
-        ) {
+        ) {*/
+        if (ctrlman.isTouchingRectangle(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth)) {
             clickedButtonNames.push(buttonName);
         } else {
             notClickedButtonNames.push(buttonName);
@@ -1430,7 +1447,6 @@ function clickMobileControls() {
     for (const buttonName of notClickedButtonNames) {
         if (MOBILE_CONTROL_MAP[buttonName]) {
             for (const action of MOBILE_CONTROL_MAP[buttonName]) {
-                console.log("Will release: " + action);
                 ctrlman.releaseAction(action);
             }
         }
@@ -1438,13 +1454,12 @@ function clickMobileControls() {
     for (const buttonName of clickedButtonNames) {
         console.log("Clicked " + buttonName);
         if (buttonName in MOBILE_CONTROL_MAP) {
-            console.log("Iterating: " + MOBILE_CONTROL_MAP[buttonName]);
             for (const action of MOBILE_CONTROL_MAP[buttonName]) {
-                console.log("Will press: "  + action);
                 ctrlman.pressAction(action);
             }
         }
     }
+    clickingMobileControls = clickedButtonNames.length != 0;
 }
 
 function overlap(i, j, l, t, r, b) {
@@ -2653,20 +2668,22 @@ function useControls() {
         var yPos = ctrlman.lastClickPositionY()-rect.top-((gameOffsetY-mapCoord.y)*renderSize);
         var blockX = Math.floor(xPos / (36*renderSize));
         var blockY = Math.floor((yPos - (disp.height*renderSize)) / (36*renderSize)) + map.length;
-        var xPo = ctrlman.lastClickPositionX() -rect.left;
+        var xPo = ctrlman.lastClickPositionX() - rect.left;
         var yPo = disp.height - ctrlman.lastClickPositionY();
-        if(menuActive[0]){
+        if (clickingMobileControls) {
+            // Don't interfere with anything else, since mobile controls are on top
+        } else if(menuActive[0]){
             // Handle clicking in menu
             menuActive[1].mouseX = xPo;
             menuActive[1].mouseY = yPo;
             if (isMobile) {
-                clickMobileControls();
+                checkMobileControls();
             }
             clickBtn();
         } else {
             // Handle clicking outside of a menu
             if (isMobile) {
-                clickMobileControls();
+                checkMobileControls();
             }
             for(var i=0;i<entities.length;i++){
                 if(entities[i].type == 2 && buttonClick(xPo,yPo,entities[i].pt-gameOffsetY,entities[i].pb-gameOffsetY,entities[i].pr-gameOffsetX,entities[i].pl-gameOffsetX)){

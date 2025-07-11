@@ -24,6 +24,7 @@ class ControlsManager {
     this.clickX = -1;
     this.clickY = -1;
     this.mousePressed = false;
+    this.touches = {};
   }
 
   /** Return whether the key corresponding to a specific action is down */
@@ -97,5 +98,27 @@ class ControlsManager {
   updateMouseLocation(x, y) {
     this.clickX = x;
     this.clickY = y;
+  }
+
+  /** Add or update a touch at a location with an identifier */
+  setTouch(x, y, identifier) {
+    this.touches[identifier] = [x, y];
+  }
+
+  /** Remove a touch with an identifier */
+  removeTouch(identifier) {
+    delete this.touches[identifier];
+  }
+
+  /** Get whether a rectangle is being touched */
+  isTouchingRectangle(x, y, width, height) {
+    console.log("Checking rectangle");
+    for (const touch of Object.values(this.touches)) {
+      console.log("- Touch: " + touch);
+      if (touch[0] >= x && touch[0] < x + width && touch[1] >= y && touch[1] < y + height) {
+        return true;
+      }
+    }
+    return false;
   }
 }
