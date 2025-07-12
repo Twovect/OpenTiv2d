@@ -146,6 +146,8 @@ serverURLInput.addEventListener("change", e => {
 
 // Store if mobile
 // This is determined by the "touchstart" and related events
+// On a touch event, this becomes true
+// On a keyboard event, this becomes false
 let isMobile = false;
 
 // Debugging

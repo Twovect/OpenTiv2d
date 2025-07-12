@@ -803,9 +803,11 @@ document.addEventListener("mousemove", function (e){
 })
 window.addEventListener("keydown", (e) => {
     // TODO: handle typing into an interface (is that even still relevant)?
+    isMobile = false;
     ctrlman.pressKey(e.key.toLowerCase());
 });
 window.addEventListener("keyup", (e) => {
+    isMobile = false;
     ctrlman.releaseKey(e.key.toLowerCase());
 });
 // For mobile
