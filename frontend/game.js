@@ -794,21 +794,9 @@ const ctrlman = new ControlsManager();
 
 disp.addEventListener("mousedown", function (e) {
     ctrlman.pressMouse();
-    // Handle clicking on mobile
-    // TODO: move to on tap/on click event
-    // TODO: prevent clicking on blocks behind, support multiple clicking
-    if (isMobile) {
-        checkMobileControls();
-    }
 });
 disp.addEventListener("mouseup", function (e) {
     ctrlman.releaseMouse();
-    // Handle clicking on mobile
-    // TODO: move to on tap/on click event
-    // TODO: prevent clicking on blocks behind, support multiple clicking
-    if (isMobile) {
-        checkMobileControls();
-    }
 });
 document.addEventListener("mousemove", function (e){
     ctrlman.updateMouseLocation(e.clientX, e.clientY);
@@ -822,6 +810,7 @@ window.addEventListener("keyup", (e) => {
 });
 // For mobile
 disp.addEventListener("touchstart", (e) => {
+    isMobile = true;
     e.preventDefault();
     for (const touch of e.changedTouches) {
         // 1. Set the mouse location
@@ -833,6 +822,7 @@ disp.addEventListener("touchstart", (e) => {
     checkMobileControls();
 });
 disp.addEventListener("touchmove", (e) => {
+    isMobile = true;
     e.preventDefault();
     for (const touch of e.changedTouches) {
         // 1. Set the mouse location
@@ -844,6 +834,7 @@ disp.addEventListener("touchmove", (e) => {
     checkMobileControls();
 });
 disp.addEventListener("touchend", (e) => {
+    isMobile = true;
     e.preventDefault();
     ctrlman.releaseMouse();
     for (const touch of e.changedTouches) {
@@ -856,6 +847,7 @@ disp.addEventListener("touchend", (e) => {
     checkMobileControls();
 });
 disp.addEventListener("touchcancel", (e) => {
+    isMobile = true;
     e.preventDefault();
     ctrlman.releaseMouse();
     for (const touch of e.changedTouches) {
@@ -1351,17 +1343,22 @@ function getMobileDimensions() {
     const BUTTON_CONTAINER_WIDTH = 70;
     const navX = 10;
     const navY = disp.height / 2 - BUTTON_WIDTH;
+    const INV_SPACING = 84;
 
     return {
         buttonWidth: BUTTON_WIDTH,
         buttonContainerWidth: BUTTON_CONTAINER_WIDTH,
         inMenu: {
-            close: {
+            menu: {
                 x: 20,
                 y: 20
             }
         },
         inNormal: {
+            menu: {
+                x: 20 + BUTTON_CONTAINER_WIDTH,
+                y: 20
+            },
             navL: {
                 x: navX,
                 y: navY
@@ -1386,32 +1383,61 @@ function getMobileDimensions() {
                 x: disp.width - BUTTON_WIDTH * 2,
                 y: disp.height / 2 - BUTTON_WIDTH
             }
+        },
+        inAll: {
+            inv1: {
+                x: 18,
+                y: disp.height - 80,
+                invisible: true
+            },
+            inv2: {
+                x: 18 + INV_SPACING * 1,
+                y: disp.height - 80,
+                invisible: true
+            },
+            inv3: {
+                x: 18 + INV_SPACING * 2,
+                y: disp.height - 80,
+                invisible: true
+            },
+            inv4: {
+                x: 18 + INV_SPACING * 3,
+                y: disp.height - 80,
+                invisible: true
+            },
+            inv5: {
+                x: 18 + INV_SPACING * 4,
+                y: disp.height - 80,
+                invisible: true
+            },
         }
     };
 }
 
 /** Maps mobile buttons to actions in the key controls manager */
 const MOBILE_CONTROL_MAP = {
-    close: ["menu"],
+    menu: ["menu"],
     navL: ["move_left"],
     navR: ["move_right"],
     navRU: ["move_right", "sprint"],
     navLU: ["move_left", "sprint"],
     navD: ["slow"],
-    jump: ["jump"]
+    jump: ["jump"],
+    inv1: ["inv_1"],
+    inv2: ["inv_2"],
+    inv3: ["inv_3"],
+    inv4: ["inv_4"],
+    inv5: ["inv_5"]
 };
 
 function drawMobileControls(isMenuActive) {
     const mobileDim = getMobileDimensions();
+    const buttonSource = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
+    const mergedButtons = {...mobileDim.inAll, ...buttonSource};
     ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
-    if (isMenuActive) {
-        for (const [buttonName, loc] of Object.entries(mobileDim.inMenu)) {
-            ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
-        }
-    } else {
-        for (const [buttonName, loc] of Object.entries(mobileDim.inNormal)) {
-            ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
-        }
+    for (const loc of Object.values(mergedButtons)) {
+        if (loc.invisible) continue;
+        ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
     }
 }
 
@@ -1419,7 +1445,7 @@ let clickingMobileControls = false;
 
 function checkMobileControls() {
     // Obtain the cursor location
-    // TODO: remove duplicate code
+    // TODO: make sure preventing digging blocks behind button
     var rect = disp.getBoundingClientRect();
     const xPos = ctrlman.lastClickPositionX();
     const yPos = ctrlman.lastClickPositionY();
@@ -1429,14 +1455,10 @@ function checkMobileControls() {
     const mobileDim = getMobileDimensions();
     const clickedButtonNames = [];
     const notClickedButtonNames = [];
-    const sourceButtonsFrom = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
-    for (const [buttonName, loc] of Object.entries(sourceButtonsFrom)) {
+    const buttonSource = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
+    const mergedButtons = {...mobileDim.inAll, ...buttonSource};
+    for (const [buttonName, loc] of Object.entries(mergedButtons)) {
         // Check if mouse is within dimensions
-        /*if (
-            xPos >= loc.x && xPos < loc.x + mobileDim.buttonWidth
-            && yPos >= loc.y && yPos < loc.y + mobileDim.buttonWidth
-            && ctrlman.isMouseDown()
-        ) {*/
         if (ctrlman.isTouchingRectangle(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth)) {
             clickedButtonNames.push(buttonName);
         } else {
@@ -1452,7 +1474,6 @@ function checkMobileControls() {
         }
     }
     for (const buttonName of clickedButtonNames) {
-        console.log("Clicked " + buttonName);
         if (buttonName in MOBILE_CONTROL_MAP) {
             for (const action of MOBILE_CONTROL_MAP[buttonName]) {
                 ctrlman.pressAction(action);
@@ -2676,9 +2697,6 @@ function useControls() {
             // Handle clicking in menu
             menuActive[1].mouseX = xPo;
             menuActive[1].mouseY = yPo;
-            if (isMobile) {
-                checkMobileControls();
-            }
             clickBtn();
         } else {
             // Handle clicking outside of a menu

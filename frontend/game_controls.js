@@ -112,9 +112,7 @@ class ControlsManager {
 
   /** Get whether a rectangle is being touched */
   isTouchingRectangle(x, y, width, height) {
-    console.log("Checking rectangle");
     for (const touch of Object.values(this.touches)) {
-      console.log("- Touch: " + touch);
       if (touch[0] >= x && touch[0] < x + width && touch[1] >= y && touch[1] < y + height) {
         return true;
       }

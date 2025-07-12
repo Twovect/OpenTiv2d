@@ -144,8 +144,9 @@ serverURLInput.addEventListener("change", e => {
     multiplayerServerURL = e.target.value;
 });
 
-// CHECK FOR MOBILE
-let isMobile = true;
+// Store if mobile
+// This is determined by the "touchstart" and related events
+let isMobile = false;
 
 // Debugging
 const debugCheck = document.getElementById("in-debugcheck");
