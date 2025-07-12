@@ -137,11 +137,23 @@ function activateGameOptionsInputs() {
 activateGameOptionsInputs();
 
 // Handle the multiplayer server URL, which is separate
-let multiplayerServerURL = "ws://localhost:5002";
+let multiplayerServerURL = "wss://server.tivect.com"; // "ws://localhost:5002"
 const serverURLInput = document.getElementById("in-serverUrl");
 serverURLInput.value = multiplayerServerURL;
 serverURLInput.addEventListener("change", e => {
     multiplayerServerURL = e.target.value;
+});
+
+// Store if mobile
+// This is determined by the "touchstart" and related events
+// On a touch event, this becomes true
+// On a keyboard event, this becomes false
+let isMobile = false;
+
+// Debugging
+const debugCheck = document.getElementById("in-debugcheck");
+debugCheck.addEventListener("click", (e) => {
+    isMobile = debugCheck.checked;
 });
 
 // Launch the game with the start button

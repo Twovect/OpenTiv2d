@@ -208,49 +208,18 @@ function knockedback(intensity){
     
 }
 function changeClick() {
-    if (controls.keys[7][1]) {
-        controls.keys[7][1] = false;
+    if (ctrlman.isDownNoHold("menu")) {
         clickAction = null;
     };
-    if (controls.keys[8][1]) {
-        controls.keys[8][1] = false;
-        if(menuActive[0]){
-            menuPress(1);
-        } else {
-            player.selected = 0;
-        }
-    };
-    if (controls.keys[9][1]) {
-        controls.keys[9][1] = false;
-        if(menuActive[0]){
-            menuPress(2);
-        } else {
-            player.selected = 1;
-        }
-    };
-    if(controls.keys[10][1]) {
-        controls.keys[10][1] = false;
-        if(menuActive[0]){
-            menuPress(3);
-        } else {
-            player.selected = 2;
-        }
-    }
-    if(controls.keys[11][1]) {
-        controls.keys[11][1] = false;
-        if(menuActive[0]){
-            menuPress(4);
-        } else {
-            player.selected = 3;
-        }
-    }
-    if(controls.keys[12][1]) {
-        controls.keys[12][1] = false;
-        if(menuActive[0]){
-            menuPress(5);
-        } else {
-            player.selected = 4;
-        }
+    // Inventory slots
+    for (let slot = 1; slot <= 5; ++slot) {
+        if (ctrlman.isDownNoHold("inv_" + slot)) {
+            if(menuActive[0]){
+                menuPress(slot);
+            } else {
+                player.selected = slot - 1;
+            }
+        };
     }
 };
 function min(a, b) { return a < b ? a : b; }
@@ -545,17 +514,17 @@ function dropItem(){
     var y1 = (player.pt + player.pb-18)/2;
     var yVel = 0;
     var xVel = 0;
-    if(!controls.keys[1][1] || !controls.keys[2][1]){
-        if(controls.keys[1][1]){
+    if (!ctrlman.isDown("move_left") || !ctrlman.isDown("move_right")) {
+        if (ctrlman.isDown("move_left")) {
             yVel = 0.1;
             xVel = -0.3;
-            if(controls.keys[3][1]){
+            if (ctrlman.isDown("sprint")) {
                 xVel -= 0.18;
             }
-        } else if(controls.keys[2][1]){
+        } else if (ctrlman.isDown("move_right")) {
             yVel = 0.1;
             xVel = 0.3;
-            if(controls.keys[3][1]){
+            if (ctrlman.isDown("sprint")) {
                 xVel += 0.18;
             }
         }
@@ -819,42 +788,82 @@ function norm(v) {
 function cross(a, b) {
     return a[0] * b[1] - b[0] * a[1];
 }
-var controls = {
-    keys:[[" ",false],["A",false],["D",false],["W",false],["S",false],["F",false],[".",false],["`",false],["1",false],["2",false],["3",false],["4",false],["5",false],["M",false],["L",false],["O",false],["C",false]],
-    click:[false,0,0],
-    control:function(e){
-        const keyDown = (e.type == "keydown");
-        const keyUp = (e.type == "keyup");
-        if(menuActive[0] && menuActive[1].type == "interface"){
-            if(keyDown){
-                interfaceType(e.key.toUpperCase());
-            }
-        }
-        for(var i=0;i<controls.keys.length;i++){
-            if(controls.keys[i][0] == e.key.toUpperCase()){
-                if(controls.keys[i][0] == -1){
-                    controls.keys[i][1] = keyUp;
-                } else {
-                    controls.keys[i][1] = keyDown;
-                }
-            }
-        }
-    },
-    mouse:function(e){
-        const mouseDown = (e.type == "mousedown");
-        controls.click[0] = mouseDown;
-        if(mouseDown){
-            controls.click[1] = e.clientX;
-            controls.click[2] = e.clientY;
-        }
+
+// CONTROL MANAGEMENT
+const ctrlman = new ControlsManager();
+
+disp.addEventListener("mousedown", function (e) {
+    ctrlman.pressMouse();
+});
+disp.addEventListener("mouseup", function (e) {
+    ctrlman.releaseMouse();
+});
+document.addEventListener("mousemove", function (e){
+    ctrlman.updateMouseLocation(e.clientX, e.clientY);
+})
+window.addEventListener("keydown", (e) => {
+    // TODO: handle typing into an interface (is that even still relevant)?
+    isMobile = false;
+    ctrlman.pressKey(e.key.toLowerCase());
+});
+window.addEventListener("keyup", (e) => {
+    isMobile = false;
+    ctrlman.releaseKey(e.key.toLowerCase());
+});
+// For mobile
+disp.addEventListener("touchstart", (e) => {
+    isMobile = true;
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.setTouch(touch.pageX, touch.pageY, touch.identifier);
     }
-}
-disp.addEventListener("mousedown", function (e) {/*clickEvent(e)*/;controls.mouse(e)});
-disp.addEventListener("mouseup", function (e) {controls.mouse(e)});
-document.addEventListener("mousemove", function (e){if(controls.click[0]){controls.click[1] = e.clientX;controls.click[2] = e.clientY}})
-window.addEventListener("keydown", controls.control);
-window.addEventListener("keyup", controls.control);
+    checkMobileControls();
+});
+disp.addEventListener("touchmove", (e) => {
+    isMobile = true;
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.pressMouse();
+        // 2. Update every touch location
+        ctrlman.setTouch(touch.pageX, touch.pageY, touch.identifier);
+    }
+    checkMobileControls();
+});
+disp.addEventListener("touchend", (e) => {
+    isMobile = true;
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.releaseMouse();
+        // 2. Update every touch location
+        ctrlman.removeTouch(touch.identifier);
+    }
+    checkMobileControls();
+});
+disp.addEventListener("touchcancel", (e) => {
+    isMobile = true;
+    e.preventDefault();
+    ctrlman.releaseMouse();
+    for (const touch of e.changedTouches) {
+        // 1. Set the mouse location
+        ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
+        ctrlman.releaseMouse();
+        // 2. Update every touch location
+        ctrlman.removeTouch(touch.identifier);
+    }
+    checkMobileControls();
+});
+
 function isSolid(val) {
+    // TODO: refactor into constants!
     if (val != 0 && val != 9 && val != 10 && val != 11 && val != 13 && val != 14 && val != 17 && val != 29 && val != 36) {
         return true;
     }
@@ -925,7 +934,7 @@ function gameSetup() {
                 map = processHeightMap(heights);
             } else {
                 // Legacy
-                legacyWorldGeneration();
+                map = legacyWorldGeneration();
             }
             const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
             var xSpawnPoint = Math.round(seedPercent * ((map[0].length-1) - 0) + 0);
@@ -965,232 +974,7 @@ function gameSetup() {
         respawn();
     }
 }
-function processHeightMap(hMap){
-    var nMap = [];
-    var width = hMap.length;
-    var height = DEFAULT_WORLDGEN_HEIGHT;
-    for(var i=0;i<height;i++){
-        nMap.push([])
-    }
-    for(var i=0;i<width;i++){
-        var aVal = height-(hMap[i]+height/2)
-        for(var j=0;j<height;j++){
-            if (j<aVal && j < DEFAULT_WATER_LEVEL) {
-                nMap[j].push(DBLOCKS[0]);
-            }
-            else if (j<aVal && j >= DEFAULT_WATER_LEVEL) {
-                nMap[j].push(DBLOCKS[13]); // Water
-            }
-            else if (j == aVal) {
-                nMap[j].push(DBLOCKS[1]);
-            }
-            else if (j > aVal && j < aVal+5) {
-                nMap[j].push(DBLOCKS[4]);
-            }
-            else if (j >= aVal+5) {
-                nMap[j].push(DBLOCKS[5]);
-            }
-        }
-        // Fill in bodies of water also
-    }
-    return nMap;
-}
-function legacyWorldGeneration(){
-    // TODO: allow legacy worldgen to work with seeds
-    var wMap = [];
-    var biomes = [1,0,1,0,1];
-    var maxBiomes = 2;
-    var yWaterLevel = 35;
-    var curY = 80 - yWaterLevel - 2;
-    var mainY = 35;
-    // for(var i=0;i<15;i++){
-    //     biomes.push(Math.floor(Math.random() * (maxBiomes - 0 + 1) + 0));
-    // }
-    for(var i=0;i<80;i++){
-        wMap.push([])
-    }
-    for(var i=0;i<biomes.length;i++){
-        var fallFor = 50;
-        var flatFor = 50;
-        var riseFor = 50;
-        var loopFor = 100;
-        var rise = false;
-        var fall = false;
-        var flat = false;
-        var biome = biomes[i];
-        if(biome == 0){
-            mainY = 80-11;
-            if(curY <= 80-11){
-                fallFor = (80-11) - curY;
-                fall = true;
-            } else {
-                flat = true;
-            }
-            // riseFor = 0;
-            // flatFor = Math.floor(Math.random() * (12 - 6 + 1) + 6);
-            // loopFor = fallFor+flatFor+riseFor;
-        } else if(biome == 1){
-            mainY = 35;
-            if(curY > mainY-2){
-                riseFor = curY - (mainY-2);
-                rise = true;
-            } else if (curY < mainY+2){
-                fallFor = (mainY+2) - curY;
-                fall = true;
-            } else {
-                flat = true;
-            }
-            // flatFor = Math.floor(Math.random() * (15 - 6 + 1) + 6);
-            // loopFor = fallFor+flatFor+riseFor;
-        } else if(biome == 2){
-            mainY = Math.floor(Math.random() * (16 - 7 + 1) + 7);
-            if(curY > mainY){
-                rise = true;
-                riseFor = curY - mainY;
-            }
-            // fallFor = 80 - yWaterLevel + mainY;
-            // loopFor = fallFor+riseFor+flatFor;
-        }
-        for(var l=0;l<loopFor;l++){
-        var minLength = 0;
-        var maxLength = 0;
-        if(curY == mainY && biome == 1){
-            fall = false;
-            rise = false;
-            flat = true;
-        } else if(curY <= mainY){
-            fall = true;
-            rise = false;
-            flat = false;
-        }
-        if(fall){
-            var fallY = Math.floor(Math.random() * (1 - 1 + 1) + 1);
-            if(biome == 0){
-                if((curY+fallY)<=80-11){
-                    curY += fallY;
-                    minLength = 1;
-                    maxLength = 4;
-                } else if ((curY+fallY)>=80-11){
-                    mainY = 80-11;
-                    fall = false;
-                    flat = true;
-                }
-            } else if(biome == 2){
-                minLength = 0;
-                maxLength = 2;
-            }
-        } else if(flat){
-            var plainY = Math.floor(Math.random() * (1 - -1 + 1) + -1);
-            if((curY+plainY) > mainY-2 && (curY+plainY) < mainY+2){
-                curY += plainY;
-            }
-            
-            minLength = 6;
-            maxLength = 9;
-        } else if(rise){
-            var riseY = Math.floor(Math.random() * (-1 - -1 + 1) + -1);
-            // if(curY+riseY>yWaterLevel){ //&& curY+riseY<yWaterLevel-3){
-            //     curY += riseY;
-            // }
 
-            curY += riseY;
-            if(biome == 2 && curY <= yWaterLevel){
-                minLength = 0;
-                maxLength = 2;
-            } else {
-                minLength = 1;
-                maxLength = 4;
-            }
-            // if(biome == 2 && curY < yWaterLevel){
-            //     minLength = 1;
-            //     maxLength = 4;
-            // } else if(biome == 2 && curY >= yWaterLevel){
-            //     minLength = 0;
-            //     maxLength = 3;
-            // }
-        }
-            var distance = Math.floor(Math.random() * (maxLength - minLength + 1) + minLength);
-            if(biome == 2 && Math.floor(Math.random() * (1 - 0 + 1) + 0) == 0){
-                if(Math.floor(Math.random() * (1 - 0 + 1) + 0) == 1){
-                    distance = 0;
-                }
-            }
-            // var riseYy = Math.floor(Math.random()* (1 - 0 + 1) + 0);
-            // if(riseYy == 0){
-            //     riseY = 0
-            // }
-            // curY += Math.floor(Math.random() * (1 - 0 + 1) + 0);
-            //Math.floor(Math.random() * (1 - 0 + 1) + 0) FOR OCEAN GENERATION
-            //Math.floor(Math.random() * (1 - -1 + 1) + -1) FOR PLAINS GENERATION
-            //Math.floor(Math.random() * (0 - -1 + 1) + -1) FOR MOUNTAINS GENERATION
-                for(var ji=0;ji<distance;ji++){
-                    for(var j=0;j<wMap.length;j++){
-                        if(j<curY){
-                            wMap[j].push(DBLOCKS[0]);
-                        } else if (j == curY){
-                            wMap[j].push(DBLOCKS[1]);
-                        } else if(j > curY && j < curY+5){
-                            wMap[j].push(DBLOCKS[4]);
-                        } else if(j >= curY+5){
-                            wMap[j].push(DBLOCKS[5]);
-                        }
-                    }
-                }
-            }
-    }
-    for(var i=(80 - yWaterLevel);i<wMap.length;i++){
-        for(var l=0;l<wMap[i].length;l++){
-            if(wMap[i][l][0] == 0){
-                // wMap[i][l] = block[13];
-                // block(i,l,13);
-                wMap[i][l] = DBLOCKS[13]
-            } else if(wMap[i][l][0] == 1){
-                wMap[i][l] = DBLOCKS[20]
-                wMap[i+1][l] = DBLOCKS[20]
-                wMap[i-1][l] = DBLOCKS[20]
-                
-                // block(i,l,20);
-                // block(i+1,l,20);
-                // block(i-1,l,20);
-            }
-        }
-    }
-    // console.log(wMap)
-
-
-    //FIX THIS -- ITS WORLDSPAWN GENERATION
-    var biomeLength = Math.floor((wMap[0].length-1)/biomes.length);
-    var biomeSpawn = Math.random() * (biomes.length - 1) + 1;
-    var xSpawnMax = biomeLength * biomeSpawn;
-    var xSpawnMin = biomeLength * (biomeSpawn-1);
-    var xSpawnPoint = Math.round(Math.random() * ((xSpawnMax-1) - xSpawnMin) + xSpawnMin);
-    var ySpawnPoint = 0;
-    for(var i=wMap.length-1;i>0;i--){
-        if(wMap[i][xSpawnPoint][0] != 0 && wMap[i-1][xSpawnPoint][0] == 0 && wMap[i-2][xSpawnPoint][0] == 0){
-            ySpawnPoint = wMap.length - i;
-            break;
-        }
-    }
-    worldSpawnPoint.x = (xSpawnPoint*36)+1;
-    worldSpawnPoint.y = (ySpawnPoint*36)+1;
-    player.pl = worldSpawnPoint.x;
-    player.pr = worldSpawnPoint.x+34;
-    player.pb = worldSpawnPoint.y;
-    player.pt = worldSpawnPoint.y+69;
-    gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
-    gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
-    for(var i=0;i<entities.length;i++){
-        entities[i].pl = worldSpawnPoint.x;
-        entities[i].pr = worldSpawnPoint.x+34;
-        entities[i].pb = worldSpawnPoint.y;
-        entities[i].pt = worldSpawnPoint.y+69;
-    }
-    for(var i=0;i<vehicles.length;i++){
-        vehicles[i].x = worldSpawnPoint.x+220;
-        vehicles[i].y = worldSpawnPoint.y;
-    }
-    map = wMap;
-}
 function drawSquare(x, y, val,clickAction) {
     if (val != 0) {
         if(clickAction == 2){
@@ -1554,15 +1338,155 @@ function interfaceType(key){
     }
 
 }
-function drawMobileControls() {
-    var btnWH = disp.width * 0.07;
-    var translateY = 2;
-    var translateX = 0;
-    var btnY = disp.height - btnWH * translateY;
-    var btnX = btnWH * translateX;
-    ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
-    ctx.fillRect(btnX, btnY, btnWH, btnWH);
+
+// MOBILE
+function getMobileDimensions() {
+    const BUTTON_WIDTH = 60;
+    const BUTTON_CONTAINER_WIDTH = 70;
+    const navX = 10;
+    const navY = disp.height / 2 - BUTTON_WIDTH;
+    const INV_SPACING = 84;
+    const invY = disp.height - 80;
+
+    return {
+        buttonWidth: BUTTON_WIDTH,
+        buttonContainerWidth: BUTTON_CONTAINER_WIDTH,
+        inMenu: {
+            close: {
+                x: disp.width - BUTTON_WIDTH * 1.5,
+                y: 20 + BUTTON_CONTAINER_WIDTH
+            }
+        },
+        inNormal: {
+            navL: {
+                x: navX,
+                y: navY
+            },
+            navR: {
+                x: navX + BUTTON_CONTAINER_WIDTH * 2,
+                y: navY
+            },
+            navRU: {
+                x: navX + BUTTON_CONTAINER_WIDTH * 1.5,
+                y: navY - BUTTON_CONTAINER_WIDTH
+            },
+            navLU: {
+                x: navX + BUTTON_CONTAINER_WIDTH / 2,
+                y: navY - BUTTON_CONTAINER_WIDTH
+            },
+            navD: {
+                x: navX + BUTTON_CONTAINER_WIDTH,
+                y: navY + BUTTON_CONTAINER_WIDTH
+            },
+            jump: {
+                x: disp.width - BUTTON_WIDTH * 2,
+                y: disp.height / 2 - BUTTON_WIDTH
+            },
+            inventory: {
+                x: disp.width - BUTTON_WIDTH * 1.5,
+                y: 20
+            },
+        },
+        inAll: {
+            inv1: {
+                x: 18,
+                y: invY,
+                invisible: true,
+                precedence: true
+            },
+            inv2: {
+                x: 18 + INV_SPACING * 1,
+                y: invY,
+                invisible: true,
+                precedence: true
+            },
+            inv3: {
+                x: 18 + INV_SPACING * 2,
+                y: invY,
+                invisible: true,
+                precedence: true
+            },
+            inv4: {
+                x: 18 + INV_SPACING * 3,
+                y: invY,
+                invisible: true,
+                precedence: true
+            },
+            inv5: {
+                x: 18 + INV_SPACING * 4,
+                y: invY,
+                invisible: true,
+                precedence: true
+            },
+        }
+    };
 }
+
+/** Maps mobile buttons to actions in the key controls manager */
+const MOBILE_CONTROL_MAP = {
+    close: ["menu"],
+    inventory: ["menu"],
+    navL: ["move_left"],
+    navR: ["move_right"],
+    navRU: ["move_right", "sprint"],
+    navLU: ["move_left", "sprint"],
+    navD: ["slow"],
+    jump: ["jump"],
+    inv1: ["inv_1"],
+    inv2: ["inv_2"],
+    inv3: ["inv_3"],
+    inv4: ["inv_4"],
+    inv5: ["inv_5"]
+};
+
+function drawMobileControls(isMenuActive) {
+    const mobileDim = getMobileDimensions();
+    const buttonSource = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
+    const mergedButtons = {...mobileDim.inAll, ...buttonSource};
+    ctx.fillStyle = MENU_MOBILE_CONTROLS_BG;
+    for (const loc of Object.values(mergedButtons)) {
+        if (loc.invisible) continue;
+        ctx.fillRect(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth);
+    }
+}
+
+let clickingMobileControls = false;
+
+function checkMobileControls() {
+    // Obtain the cursor location
+    const isMenuActive = menuActive[0];
+    // Check the buttons
+    const mobileDim = getMobileDimensions();
+    const clickedButtonNames = [];
+    const notClickedButtonNames = [];
+    const buttonSource = isMenuActive ? mobileDim.inMenu : mobileDim.inNormal;
+    const mergedButtons = {...mobileDim.inAll, ...buttonSource};
+    for (const [buttonName, loc] of Object.entries(mergedButtons)) {
+        // Check if mouse is within dimensions
+        if (ctrlman.isTouchingRectangle(loc.x, loc.y, mobileDim.buttonWidth, mobileDim.buttonWidth)) {
+            clickedButtonNames.push(buttonName);
+        } else {
+            notClickedButtonNames.push(buttonName);
+        }
+    }
+    // Deal with the buttons clicked
+    for (const buttonName of notClickedButtonNames) {
+        if (MOBILE_CONTROL_MAP[buttonName]) {
+            for (const action of MOBILE_CONTROL_MAP[buttonName]) {
+                ctrlman.releaseAction(action);
+            }
+        }
+    }
+    for (const buttonName of clickedButtonNames) {
+        if (buttonName in MOBILE_CONTROL_MAP) {
+            for (const action of MOBILE_CONTROL_MAP[buttonName]) {
+                ctrlman.pressAction(action);
+            }
+        }
+    }
+    clickingMobileControls = clickedButtonNames.length != 0;
+}
+
 function overlap(i, j, l, t, r, b) {
     var bt = (36 * (map.length - i))+mapCoord.y;
     var bl = mapCoord.x+j * 36;
@@ -2580,7 +2504,7 @@ function isTool(){
 function getCurrent(){
     return current;
 }
-function useControls(){
+function useControls() {
     var speed = 1.4;
     // var gravity = (9.8*36)/((60/1)*(60/1))*(60/60);
     // var jump = 7.4*(60/60);
@@ -2610,7 +2534,7 @@ function useControls(){
     // var scrollBackgroundX = false;
     // var scrollBackgroundY = false;
     if(!menuActive[0]){
-        if (controls.keys[3][1]) {
+        if (ctrlman.isDown("sprint")) {
             if (gameOptions.godMode == 1) {
                 speed *= 3.3;
             } else {
@@ -2620,35 +2544,33 @@ function useControls(){
                 jump *= 1.4;
             };
         };
-        if (controls.keys[4][1]) {
+        if (ctrlman.isDown("slow")) {
             speed /= 2;
             if (player.inWater) {
                 gravity *= 2.6;
             };
         };
-        if (controls.keys[0][1] && (player.jumping == false || gameOptions.godMode == 1)) {
+        if (ctrlman.isDown("jump") && (player.jumping == false || gameOptions.godMode == 1)) {
             // Jump
             player.velY += jump;
             player.jumping = true;
             player.velY = Math.min(player.velY, 20);
         };
-        if (controls.keys[1][1]) {
+        if (ctrlman.isDown("move_left")) {
             player.velX -= 0.5;
         };
-        if (controls.keys[2][1]) {
+        if (ctrlman.isDown("move_right")) {
             player.velX += 0.5;
         };
-        if (controls.keys[5][1]){
-            controls.keys[5][1] = false;
+        if (ctrlman.isDownNoHold("drop")){
             dropItem();
         }
-        if (controls.keys[6][1]) {
-            controls.keys[6][1] = false;
+        if (ctrlman.isDownNoHold("respawn")) {
             willRespawn = true;
         };
-        if (controls.keys[14][1] && controls.keys[15][1]) {
-            controls.keys[14][1] = false;
-            controls.keys[15][1] = false;
+        if (ctrlman.isDown("save1") && ctrlman.isDown("save2")) {
+            ctrlman.releaseAction("save1");
+            ctrlman.releaseAction("save2");
             saveGame();
         }
     } else if(menuActive[0] && menuActive[1].purpose == "vehicle"){
@@ -2663,56 +2585,47 @@ function useControls(){
                 cruiseC = "ON";
             }
             menuActive[1].rows[4][1][1] = cruiseC;
-            if (controls.keys[3][1]) {
+            if (ctrlman.isDown("sprint")) {
                 vehicles[menuActive[1].isVehicle].movingUp = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingUp = false;
             }
-            if (controls.keys[4][1]) {
+            if (ctrlman.isDown("slow")) {
                 vehicles[menuActive[1].isVehicle].movingDown = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingDown = false;
             }
-            if (controls.keys[1][1]) {
+            if (ctrlman.isDown("move_left")) {
                 vehicles[menuActive[1].isVehicle].movingLeft = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingLeft = false;
             }
-            if (controls.keys[2][1]) {
+            if (ctrlman.isDown("move_right")) {
                 vehicles[menuActive[1].isVehicle].movingRight = true;
             } else if(!vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingRight = false;
             }
-            // console.log(controls.keys[16][1]);
-            if(controls.keys[16][1]){
-                controls.keys[16][1] = false;
-                if(vehicles[menuActive[1].isVehicle].cruise){
+            if (ctrlman.isDownNoHold("cruise")) {
+                if (vehicles[menuActive[1].isVehicle].cruise) {
                     vehicles[menuActive[1].isVehicle].cruise = false;
                 } else {
                     vehicles[menuActive[1].isVehicle].cruise = true;
                 }
             }
         }
-    } else if(menuActive[0] && menuActive[1].type == "gui"){
-        if (controls.keys[3][1]) {
+    } else if (menuActive[0] && menuActive[1].type == "gui") {
+        // Documentation: unknown what "gui" actually is (is it like the vehicle builder?)
+        if (ctrlman.isDownNoHold("sprint")) {
             menuActive[1].offsetY += 1;
-            controls.keys[3][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingUp = true;
         }
-        if (controls.keys[4][1]) {
+        if (ctrlman.isDownNoHold("slow")) {
             menuActive[1].offsetY -= 1;
-            controls.keys[4][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingDown = true;
         }
-        if (controls.keys[1][1]) {
+        if (ctrlman.isDownNoHold("move_left")) {
             menuActive[1].offsetX += 1;
-            controls.keys[1][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingLeft = true;
         }
-        if (controls.keys[2][1]) {
+        if (ctrlman.isDownNoHold("move_right")) {
             menuActive[1].offsetX -= 1;
-            controls.keys[2][1] = false;
-            // vehicles[menuActive[1].isVehicle].movingRight = true;
         }
     }
 
@@ -2724,8 +2637,7 @@ function useControls(){
     //     }
     // }
 
-    if (controls.keys[7][1]) {
-        controls.keys[7][1] = false;
+    if (ctrlman.isDownNoHold("menu")) {
         if(menuActive[0]){
             if(menuActive[1].purpose == "vehicle" && player.inVehicle != -1  && !vehicles[menuActive[1].isVehicle].cruise){
                 vehicles[menuActive[1].isVehicle].movingUp = false;
@@ -2767,24 +2679,34 @@ function useControls(){
         }
     }
     changeClick();
-    if(controls.click[0] && canHoldClick){
+
+    if (ctrlman.isMouseDown() && canHoldClick) {
+        // Currently clicking
         canHoldClick = false;
         setTimeout(function(){
+            // TODO: refactor this, it's hard to read
             canHoldClick = true;
         },300);
         var placeBlock = true;
         var rect = disp.getBoundingClientRect();
-        var xPos = controls.click[1]-rect.left+((gameOffsetX-mapCoord.x)*renderSize);
-        var yPos = controls.click[2]-rect.top-((gameOffsetY-mapCoord.y)*renderSize);
+        var xPos = ctrlman.lastClickPositionX() -rect.left+((gameOffsetX-mapCoord.x)*renderSize);
+        var yPos = ctrlman.lastClickPositionY()-rect.top-((gameOffsetY-mapCoord.y)*renderSize);
         var blockX = Math.floor(xPos / (36*renderSize));
         var blockY = Math.floor((yPos - (disp.height*renderSize)) / (36*renderSize)) + map.length;
-        var xPo = controls.click[1]-rect.left;
-        var yPo = disp.height - controls.click[2];
-        if(menuActive[0]){
+        var xPo = ctrlman.lastClickPositionX() - rect.left;
+        var yPo = disp.height - ctrlman.lastClickPositionY();
+        if (clickingMobileControls) {
+            // Don't interfere with anything else, since mobile controls are on top
+        } else if(menuActive[0]){
+            // Handle clicking in menu
             menuActive[1].mouseX = xPo;
             menuActive[1].mouseY = yPo;
             clickBtn();
         } else {
+            // Handle clicking outside of a menu
+            if (isMobile) {
+                checkMobileControls();
+            }
             for(var i=0;i<entities.length;i++){
                 if(entities[i].type == 2 && buttonClick(xPo,yPo,entities[i].pt-gameOffsetY,entities[i].pb-gameOffsetY,entities[i].pr-gameOffsetX,entities[i].pl-gameOffsetX)){
                     menuActive[1] = entities[i].traderMenu;
@@ -2818,8 +2740,8 @@ function useControls(){
                 }
             }
             for(var i=0;i<vehicles.length;i++){
-                var vehXpos = controls.click[1]-rect.left+(gameOffsetX-vehicles[i].x)*renderSize;
-                var vehYpos = controls.click[2]-rect.top-(gameOffsetY-vehicles[i].y)*renderSize;
+                var vehXpos = ctrlman.lastClickPositionX() -rect.left+(gameOffsetX-vehicles[i].x)*renderSize;
+                var vehYpos = ctrlman.lastClickPositionY()-rect.top-(gameOffsetY-vehicles[i].y)*renderSize;
                 var vehBlockX = Math.floor(vehXpos / (36*renderSize));
                 var vehBlockY = Math.floor((vehYpos - (disp.height*renderSize)) / (36*renderSize)) + vehicles[i].map.length;
                 if(validVehicleBlock(vehBlockY,vehBlockX,i)){
@@ -3300,8 +3222,9 @@ function renderFrame() {
     //     rays[i] = rayCast(player.pl+17,player.pt-15,(0.15625*i));
     //     ctx.lineTo();
     // }
-    if (mobileControls) {
-        drawMobileControls();
+    //if (mobileControls) {
+    if (isMobile) {
+        drawMobileControls(menuActive[0]);
     }
     if (gameCharacterActive) {
         setTimeout(window.requestAnimationFrame(renderFrame),1000/60);
