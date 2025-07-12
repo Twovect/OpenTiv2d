@@ -1454,10 +1454,6 @@ let clickingMobileControls = false;
 
 function checkMobileControls() {
     // Obtain the cursor location
-    // TODO: make sure preventing digging blocks behind button
-    var rect = disp.getBoundingClientRect();
-    const xPos = ctrlman.lastClickPositionX();
-    const yPos = ctrlman.lastClickPositionY();
     const isMenuActive = menuActive[0];
     // Check the buttons
     const mobileDim = getMobileDimensions();
