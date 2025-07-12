@@ -842,7 +842,7 @@ disp.addEventListener("touchend", (e) => {
     for (const touch of e.changedTouches) {
         // 1. Set the mouse location
         ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
-        ctrlman.pressMouse();
+        ctrlman.releaseMouse();
         // 2. Update every touch location
         ctrlman.removeTouch(touch.identifier);
     }
@@ -855,7 +855,7 @@ disp.addEventListener("touchcancel", (e) => {
     for (const touch of e.changedTouches) {
         // 1. Set the mouse location
         ctrlman.updateMouseLocation(touch.pageX, touch.pageY);
-        ctrlman.pressMouse();
+        ctrlman.releaseMouse();
         // 2. Update every touch location
         ctrlman.removeTouch(touch.identifier);
     }
@@ -1346,21 +1346,18 @@ function getMobileDimensions() {
     const navX = 10;
     const navY = disp.height / 2 - BUTTON_WIDTH;
     const INV_SPACING = 84;
+    const invY = disp.height - 80;
 
     return {
         buttonWidth: BUTTON_WIDTH,
         buttonContainerWidth: BUTTON_CONTAINER_WIDTH,
         inMenu: {
-            menu: {
-                x: 20,
-                y: 20
+            close: {
+                x: disp.width - BUTTON_WIDTH * 1.5,
+                y: 20 + BUTTON_CONTAINER_WIDTH
             }
         },
         inNormal: {
-            menu: {
-                x: 20 + BUTTON_CONTAINER_WIDTH,
-                y: 20
-            },
             navL: {
                 x: navX,
                 y: navY
@@ -1384,33 +1381,42 @@ function getMobileDimensions() {
             jump: {
                 x: disp.width - BUTTON_WIDTH * 2,
                 y: disp.height / 2 - BUTTON_WIDTH
-            }
+            },
+            inventory: {
+                x: disp.width - BUTTON_WIDTH * 1.5,
+                y: 20
+            },
         },
         inAll: {
             inv1: {
                 x: 18,
-                y: disp.height - 80,
-                invisible: true
+                y: invY,
+                invisible: true,
+                precedence: true
             },
             inv2: {
                 x: 18 + INV_SPACING * 1,
-                y: disp.height - 80,
-                invisible: true
+                y: invY,
+                invisible: true,
+                precedence: true
             },
             inv3: {
                 x: 18 + INV_SPACING * 2,
-                y: disp.height - 80,
-                invisible: true
+                y: invY,
+                invisible: true,
+                precedence: true
             },
             inv4: {
                 x: 18 + INV_SPACING * 3,
-                y: disp.height - 80,
-                invisible: true
+                y: invY,
+                invisible: true,
+                precedence: true
             },
             inv5: {
                 x: 18 + INV_SPACING * 4,
-                y: disp.height - 80,
-                invisible: true
+                y: invY,
+                invisible: true,
+                precedence: true
             },
         }
     };
@@ -1418,7 +1424,8 @@ function getMobileDimensions() {
 
 /** Maps mobile buttons to actions in the key controls manager */
 const MOBILE_CONTROL_MAP = {
-    menu: ["menu"],
+    close: ["menu"],
+    inventory: ["menu"],
     navL: ["move_left"],
     navR: ["move_right"],
     navRU: ["move_right", "sprint"],
@@ -1452,7 +1459,6 @@ function checkMobileControls() {
     const xPos = ctrlman.lastClickPositionX();
     const yPos = ctrlman.lastClickPositionY();
     const isMenuActive = menuActive[0];
-    console.log("Checking clicked mobile controls: " + xPos + ", " + yPos);
     // Check the buttons
     const mobileDim = getMobileDimensions();
     const clickedButtonNames = [];
