@@ -137,7 +137,7 @@ function activateGameOptionsInputs() {
 activateGameOptionsInputs();
 
 // Handle the multiplayer server URL, which is separate
-let multiplayerServerURL = "ws://localhost:5002";
+let multiplayerServerURL = "wss://server.tivect.com"; // "ws://localhost:5002"
 const serverURLInput = document.getElementById("in-serverUrl");
 serverURLInput.value = multiplayerServerURL;
 serverURLInput.addEventListener("change", e => {

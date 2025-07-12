@@ -105,13 +105,17 @@
                                     </div>
                                     <div class="settingbox" style="display: none;">
                                         <span>DEBUG</span>
-					<input type="checkbox" id="in-debugcheck">
+                                        <input type="checkbox" id="in-debugcheck">
                                     </div>
                                 </div>
                                 <div id="multiplayer-settings" class="innersettings" style="width: 400px; display: none;" >
                                     <div class="settingbox">
                                         <span>Server URL</span>
-                                        <input id="in-serverUrl" type="text" placeholder="ws://... or wss://..." style="width: 245px;" value="http://localhost:5002">
+                                        <input id="in-serverUrl" list="servers" type="text" placeholder="ws://... or wss://..." style="width: 245px;" value="">
+                                        <datalist id="servers">
+                                            <option>ws://localhost:5002</option>
+                                            <option>wss://server.tivect.com</option>
+                                        </datalist>
                                     </div>
                                 </div>
                             </div>

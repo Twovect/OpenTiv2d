@@ -51,7 +51,7 @@ async function setUpWs(url) {
                         coordSend = `${player.pl}|${player.pr}|${player.pt}|${player.pb}`;
                     }
                     // console.log(coordSend)
-                    ws.send(`position|${coordSend}|${controls.keys[3][1]}|${controls.keys[4][1]}|${controls.keys[1][1]}|${controls.keys[2][1]}|${controls.keys[0][1]}|${player.inWater}|${player.inLeaves}|${player.jumping}|${player.velX}|${player.velY}|${player.itemBar[player.selected].select}|${player.itemBar[player.selected].clickAction}|${player.inVehicle}|${player.color}|${vehicleSend}|${sid}`);
+                    ws.send(`position|${coordSend}|${ctrlman.isDown("sprint")}|${ctrlman.isDown("slow")}|${ctrlman.isDown("move_left")}|${ctrlman.isDown("move_right")}|${ctrlman.isDown("jump")}|${player.inWater}|${player.inLeaves}|${player.jumping}|${player.velX}|${player.velY}|${player.itemBar[player.selected].select}|${player.itemBar[player.selected].clickAction}|${player.inVehicle}|${player.color}|${vehicleSend}|${sid}`);
                     if (vehicles.length != res.vehicles.length) {
                         //send a request for the vehicles
                     } else {
