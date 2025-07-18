@@ -148,8 +148,8 @@ function setWorldBlockToId(y,x,blockId) {
     if (blockId > DBLOCKS.length-1 || blockId < 0){
         return;
     }
-    // TODO: copy instead, to prevent reference issues??
-    map[y][x] = DBLOCKS[blockId];
+    // Copy to avoid reference issues
+    map[y][x] = DBLOCKS[blockId].slice();
 }
 
 var player = {
@@ -926,12 +926,10 @@ function gameSetup() {
         if(!multiplayer) {
             if (gameOptions.worldgenMethod == 0) {
                 // Modern
-                let heights = modernWorldgen(gameOptions);
-                map = processHeightMap(heights);
+                map = modernWorldgen(gameOptions);
             } else if (gameOptions.worldgenMethod == 1) {
                 // Diverse
-                let heights = diverseWorldgen(gameOptions);
-                map = processHeightMap(heights);
+                map = diverseWorldgen(gameOptions);
             } else {
                 // Legacy
                 map = legacyWorldGeneration();

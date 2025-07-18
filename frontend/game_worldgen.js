@@ -1,36 +1,37 @@
-/** Return a height map of what height each x coordinate should be, using only mountains */
+/** Return the generated map, containing only mountains */
 function modernWorldgen(options) {
     const heights = [];
     for(let i = 0; i < options.worldWidth; i++){
         let newHeight = Math.floor(TivectWorldgenFunctions.mountains(i/10.0, options.seed)*DEFAULT_WORLDGEN_VERTICAL_SCALE);
         heights.push(newHeight)
     }
-    return heights;
+    return processHeightMap(heights);
 }
 
-/** Return a height map of what height each x coordinate should be, using diverse biomes */
+/** Return the generated map, using diverse biomes */
 function diverseWorldgen(options) {
     const heights = [];
     const biomes = generateBiomes(options);
-    for(let i = 0; i < options.worldWidth; i++){
+    for (let i = 0; i < options.worldWidth; i++){
         let newHeight = 1;
         if (biomes[i] == 0) {
             newHeight = Math.floor(TivectWorldgenFunctions.mountains(i/10.0, options.seed)*DEFAULT_WORLDGEN_VERTICAL_SCALE);
         } else if (biomes[i] == 1) {
-            newHeight = Math.floor(TivectWorldgenFunctions.plateau(i/10.0, options.seed)*DEFAULT_WORLDGEN_VERTICAL_SCALE);
-        } else if (biomes[i] == 1) {
-            newHeight = Math.floor(TivectWorldgenFunctions.oceanFloor(i/10.0, options.seed)*0.3*DEFAULT_WORLDGEN_VERTICAL_SCALE);
+            newHeight = Math.floor(TivectWorldgenFunctions.mountains(i/10.0, options.seed)*DEFAULT_WORLDGEN_VERTICAL_SCALE);
+        } else {
+            newHeight = Math.floor(TivectWorldgenFunctions.mountains(i/10.0, options.seed)*DEFAULT_WORLDGEN_VERTICAL_SCALE);
         }
-        const TRANSITION_LEN = 10;
+        /*const TRANSITION_LEN = 10;
         for (let j = 0; j < TRANSITION_LEN; j++) {
             if (i > j && biomes[i - j - 1] != biomes[i]) {
                 newHeight = Math.floor((heights[i - 1] * (TRANSITION_LEN - j) + newHeight * j) / (1.0 * TRANSITION_LEN));
                 previousBiome = biomes[i];
             }
-        }
+        }*/
+        newHeight += 3;
         heights.push(newHeight)
     }
-    return heights;
+    return processHeightMapDiverse(heights, options.seed);
 }
 
 /** Return an array of what biome each x coordinate should be */
@@ -142,47 +143,111 @@ class TivectWorldgenFunctions {
 }
 
 /** Fill in the given height map and return the result */
-function processHeightMap(hMap){
-    var nMap = [];
-    var width = hMap.length;
-    var height = DEFAULT_WORLDGEN_HEIGHT;
-    for(var i=0;i<height;i++){
-        nMap.push([])
+function processHeightMap(hMap) {
+    let res = [];
+    let width = hMap.length;
+    let height = DEFAULT_WORLDGEN_HEIGHT;
+    for (let i = 0; i < height; i++) {
+        let newrow = [];
+        for (let j = 0; j < width; j++) {
+            newrow.push(undefined);
+        }
+        res.push(newrow);
     }
-    for(var i=0;i<width;i++){
-        var grassLevel = height-(hMap[i]+height/2)
-        var nearWaterLevel = grassLevel >= DEFAULT_WATER_LEVEL - 2;
-        for(var j=0;j<height;j++){
-            if (j<grassLevel && j < DEFAULT_WATER_LEVEL) {
-                nMap[j].push(DBLOCKS[0]);
+    for (let i = 0; i < width; i++) {
+        let grassLevel = height - (hMap[i] + height / 2)
+        let nearWaterLevel = grassLevel >= DEFAULT_WATER_LEVEL - 2;
+        for (let j = 0; j < height; j++) {
+            if (j < grassLevel && j < DEFAULT_WATER_LEVEL) {
+                // Air
+                setBlock(res, i, j, 0);
             }
-            else if (j<grassLevel && j >= DEFAULT_WATER_LEVEL) {
+            else if (j < grassLevel && j >= DEFAULT_WATER_LEVEL) {
                 // Water
-                nMap[j].push(DBLOCKS[13]);
+                setBlock(res, i, j, 13);
             }
             else if (j == grassLevel) {
                 // Grass level
                 if (nearWaterLevel) {
-                    nMap[j].push(DBLOCKS[20]);
+                    setBlock(res, i, j, 20);
                 } else {
-                    nMap[j].push(DBLOCKS[1]);
+                    setBlock(res, i, j, 1);
                 }
             }
-            else if (j > grassLevel && j < grassLevel+5) {
-                // Dirt level
+            else if (j > grassLevel && j < grassLevel + 5) {
+                // Dirt/sand level
                 if (nearWaterLevel && j < grassLevel + 2) {
-                    nMap[j].push(DBLOCKS[20]);
+                    setBlock(res, i, j, 20);
                 } else {
-                    nMap[j].push(DBLOCKS[4]);
+                    setBlock(res, i, j, 4);
                 }
             }
-            else if (j >= grassLevel+5) {
-                nMap[j].push(DBLOCKS[5]);
+            else if (j >= grassLevel + 5) {
+                // Stone level
+                setBlock(res, i, j, 5);
             }
         }
-        // Fill in bodies of water also
     }
-    return nMap;
+    return res;
+}
+
+/** Fill in the given height map in a diverse style, and return the result */
+function processHeightMapDiverse(hMap, seed) {
+    let gen = new pseudoRand(seed);
+    let res = [];
+    let width = hMap.length;
+    let height = DEFAULT_WORLDGEN_HEIGHT;
+    for (let i = 0; i < height; i++) {
+        let newrow = [];
+        for (let j = 0; j < width; j++) {
+            newrow.push(undefined);
+        }
+        res.push(newrow);
+    }
+    for (let i = 0; i < width; i++) {
+        let grassLevel = height - (hMap[i] + height / 2)
+        let nearWaterLevel = grassLevel >= DEFAULT_WATER_LEVEL - 2;
+        for (let j = 0; j < height; j++) {
+            if (j < grassLevel && j < DEFAULT_WATER_LEVEL) {
+                // Air
+                setBlock(res, i, j, 0);
+            }
+            else if (j < grassLevel && j >= DEFAULT_WATER_LEVEL) {
+                // Water
+                setBlock(res, i, j, 13);
+            }
+            else if (j == grassLevel) {
+                // Grass level
+                if (nearWaterLevel) {
+                    setBlock(res, i, j, 20);
+                } else {
+                    setBlock(res, i, j, 1);
+                }
+            }
+            else if (j > grassLevel && j < grassLevel + 5) {
+                // Dirt/sand level
+                if (nearWaterLevel && j < grassLevel + 2) {
+                    setBlock(res, i, j, 20);
+                } else {
+                    setBlock(res, i, j, 4);
+                }
+            }
+            else if (j >= grassLevel + 5) {
+                // Stone level
+                setBlock(res, i, j, 5);
+            }
+        }
+    }
+    // Trees
+    for (let x = 2; x < width - 2; x++) {
+        let grassLevel = height - (hMap[x] + height / 2);
+        if (gen.next() < 0.1) {
+            // Create a tree here
+            setBlock(res, x, grassLevel - 1, 2);
+        }
+    }
+    // TODO: caves
+    return res;
 }
 
 /** Generate the whole world in the legacy style and return the result */
@@ -382,4 +447,33 @@ function legacyWorldGeneration(){
         vehicles[i].y = worldSpawnPoint.y;
     }*/
     return wMap;
+}
+
+/** Utility: pseudorandom number generation from a seed */
+class pseudoRand {
+    constructor(seed) {
+        this.seed = seed;
+        this.previous = this.seed;
+    }
+    next() {
+        const PSEUDO_MAX = 2147483647;
+        const next = this.previous * 16807 % PSEUDO_MAX;
+        this.previous = next;
+        return next / PSEUDO_MAX;
+    }
+}
+
+/**
+    Utility: set a world block to be a copy of a dblock
+    Prevents reference issues and handles out of bounds errors
+*/
+function setBlock(map, x, y, blockId) {
+    if (blockId < 0 || blockId >= DBLOCKS.length) {
+        console.error("Attempted to set block to id " + blockId + ", which does not exist");
+    }
+    if (x < 0 || y < 0 || y >= map.length || x >= map[y].length) {
+        console.error("Attempted to set block at (x: " + x + ", y: " + y + "), which is out of range");
+    }
+    // Copy to avoid reference issues
+    map[y][x] = DBLOCKS[blockId].slice();
 }
