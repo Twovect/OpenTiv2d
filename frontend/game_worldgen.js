@@ -238,13 +238,43 @@ function processHeightMapDiverse(hMap, seed) {
             }
         }
     }
-    // Trees
+    // Trees and other structures
+    const TREE_CHANCE = 0.02
+    const HOME_CHANCE = 0.02
+    const HOME_COOLDOWN_VAL = 10;
+    let homeCooldown = 0;
     for (let x = 2; x < width - 2; x++) {
         let grassLevel = height - (hMap[x] + height / 2);
-        if (gen.next() < 0.1) {
+        if (gen.next() < TREE_CHANCE && grassLevel < DEFAULT_WATER_LEVEL) {
             // Create a tree here
-            setBlock(res, x, grassLevel - 1, 2);
+            const treeHeight = Math.floor(gen.next() * 4 + 3);
+            for (let k = 0; k < treeHeight; k++) {
+                setBlock(res, x, grassLevel - 1 - k, 9); // 39?
+            }
+            // TODO: move to constants or another file?
+            const STRUCTURE_TREETOP = [
+                [-1, 29, 29, 29, -1],
+                [29, 29, 29, 29, 29],
+                [29, 29, 29, 29, 29],
+            ];
+            spawnStructure(res, x - 2, grassLevel - 1 - treeHeight - 2, STRUCTURE_TREETOP);
         }
+        if (gen.next() < HOME_CHANCE && grassLevel < DEFAULT_WATER_LEVEL - 2 && homeCooldown <= 0) {
+            const STRUCTURE_HOME = [
+                [-1,15,15,15,15,15,15,-1],
+                [15,2,2,2,2,2,2,15],
+                [-1,2,9,10,10,10,2,-1],
+                [-1,9,9,10,10,10,9,-1],
+                [-1,9,9,9,9,9,9,-1],
+                [-1,16,16,16,16,16,16,-1],
+                [-1,4,4,4,4,4,4,-1],
+                [-1,4,4,4,4,4,4,-1],
+                [-1,4,4,4,4,4,4,-1]
+            ];
+            spawnStructure(res, x - 2, grassLevel - 6, STRUCTURE_HOME, false);
+            homeCooldown = HOME_COOLDOWN_VAL;
+        }
+        homeCooldown--;
     }
     // TODO: caves
     return res;
@@ -476,4 +506,21 @@ function setBlock(map, x, y, blockId) {
     }
     // Copy to avoid reference issues
     map[y][x] = DBLOCKS[blockId].slice();
+}
+
+/**
+    Utility: spawn a structure in the world
+    The value -1 will count as "nothing" and will always yield to an already-existing non-air block
+    If override land is true, any block will be overrideen; otherwise, only air will be overridden
+*/
+function spawnStructure(map, x, y, structureData, overrideLand = true) {
+    for (let y1 = 0; y1 < structureData.length; y1++) {
+        for (let x1 = 0; x1 < structureData[0].length; x1++) {
+            // Don't override if the structure has "nothing"
+            if (structureData[y1][x1] == -1) continue;
+            // Yield to land
+            if (!overrideLand && map[y + y1][x + x1][0] != 0) continue;
+            setBlock(map, x + x1, y + y1, structureData[y1][x1]);
+        }
+    }
 }
