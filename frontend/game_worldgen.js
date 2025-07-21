@@ -204,6 +204,8 @@ function processHeightMapDiverse(hMap, seed) {
         }
         res.push(newrow);
     }
+    const ORE_CHANCE = 0.005;
+    const BRICK_CHANCE = 0.10;
     for (let i = 0; i < width; i++) {
         let grassLevel = height - (hMap[i] + height / 2)
         let nearWaterLevel = grassLevel >= DEFAULT_WATER_LEVEL - 2;
@@ -234,13 +236,19 @@ function processHeightMapDiverse(hMap, seed) {
             }
             else if (j >= grassLevel + 5) {
                 // Stone level
-                setBlock(res, i, j, 5);
+                if (gen.next() < ORE_CHANCE) {
+                    setBlock(res, i, j, Math.floor(gen.next() * 8 + 21));
+                } else if (j >= grassLevel && (1 - (gen.next() * (j - grassLevel) / 30)) < BRICK_CHANCE) {
+                    setBlock(res, i, j, 6);
+                } else {
+                    setBlock(res, i, j, 5);
+                }
             }
         }
     }
     // Trees and other structures
-    const TREE_CHANCE = 0.02
-    const HOME_CHANCE = 0.02
+    const TREE_CHANCE = 0.02;
+    const HOME_CHANCE = 0.02;
     const HOME_COOLDOWN_VAL = 10;
     let homeCooldown = 0;
     for (let x = 2; x < width - 2; x++) {
