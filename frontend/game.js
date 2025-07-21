@@ -869,6 +869,30 @@ function isSolid(val) {
     }
     return false;
 };
+
+/** Get the height of the highest surface position where a player can fit (from the bottom of the world) */
+function getSurfaceHeight(xloc) {
+    for (let i = map.length - 1; i >= 0; i--) {
+        if (
+            map[i][xloc][0] != 0
+            && map[i-1][xloc][0] == 0
+            && map[i-2][xloc][0] == 0
+        ) {
+            return map.length - i;
+        }
+    }
+    console.error("Cannot find a suitable surface height in the map (searching the column of x=" + xloc + ")");
+    return 2;
+}
+
+/** Teleport a character to specific coordinates, persisting their height and width */
+function teleportTo(character, xloc, yloc) {
+    character.pl = xloc;
+    character.pr = xloc+34;
+    character.pb = yloc;
+    character.pt = yloc+69;
+}
+
 function gameSetup() {
     if(!loaded){
         loaded = true;
@@ -922,8 +946,9 @@ function gameSetup() {
         electricEffect.src = "assets/textures/electricEffect.png";
         // Sync the player with the game options
         player.color = gameOptions.playerColor;
-        // Generate world in multiplayer only
-        if(!multiplayer) {
+        // Generate world in singleplayer only
+        if (!multiplayer) {
+            const rand = new pseudoRand(gameOptions.seed);
             if (gameOptions.worldgenMethod == 0) {
                 // Modern
                 map = modernWorldgen(gameOptions);
@@ -934,37 +959,26 @@ function gameSetup() {
                 // Legacy
                 map = legacyWorldGeneration();
             }
-            const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
-            var xSpawnPoint = Math.round(seedPercent * ((map[0].length-1) - 0) + 0);
-            var ySpawnPoint = 0;
-            /*for (let y = 0; y < map.length; ++y) {
-                if (map[y][xSpawnPoint][0] == 0) {
-                vals[xSpawnPoint];
-            }*/
-            for(var i=map.length-1;i>0;i--){
-                if(map[i][xSpawnPoint][0] != 0 && map[i-1][xSpawnPoint][0] == 0 && map[i-2][xSpawnPoint][0] == 0){
-                    ySpawnPoint = map.length - i;
-                    break;
-                }
-            }
+            // Generate the spawn point
+            //const seedPercent = ((gameOptions.seed + 12345) % 1000) / 1000.0;
+            let xSpawnPoint = Math.round(rand.next() * ((map[0].length-1) - 0) + 0);
+            let ySpawnPoint = getSurfaceHeight(xSpawnPoint);
             worldSpawnPoint.x = (xSpawnPoint*36)+1;
             worldSpawnPoint.y = (ySpawnPoint*36)+1;
-            player.pl = worldSpawnPoint.x;
-            player.pr = worldSpawnPoint.x+34;
-            player.pb = worldSpawnPoint.y;
-            player.pt = worldSpawnPoint.y+69;
-            gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
-            gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
-            for(var i=0;i<entities.length;i++){
-                entities[i].pl = worldSpawnPoint.x;
-                entities[i].pr = worldSpawnPoint.x+34;
-                entities[i].pb = worldSpawnPoint.y;
-                entities[i].pt = worldSpawnPoint.y+69;
+            // Move player to the spawn point
+            teleportTo(player, worldSpawnPoint.x, worldSpawnPoint.y);
+            // Move entities to somewhere near the spawn point
+            for (let i=0;i<entities.length;i++) {
+                teleportTo(entities[i], worldSpawnPoint.x, worldSpawnPoint.y);
             }
-            for(var i=0;i<vehicles.length;i++){
+            // Move vehicles to somewhere near the spawn point
+            for (let i=0;i<vehicles.length;i++) {
                 vehicles[i].x = worldSpawnPoint.x+220;
                 vehicles[i].y = worldSpawnPoint.y;
             }
+            // Start
+            gameOffsetY = worldSpawnPoint.y-(disp.height/2)+1;
+            gameOffsetX = worldSpawnPoint.x-(disp.width/2)+1;
         }
         gameCharacterActive = true;
         renderFrame();
